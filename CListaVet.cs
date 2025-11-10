@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-class CListaVet<T> : IEnumerable<T>
+public class CListaVet<T> : IEnumerable<T>
 {
     private T[] Itens;
     private int Qtde = 0;
