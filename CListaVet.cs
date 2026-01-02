@@ -1,54 +1,90 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+/// <summary>
+/// Implementa uma lista de tamanho variável que usa um vetor interno para armazenar os itens.
+/// A lista tem uma capacidade, que é o comprimento do vetor interno.
+/// A medida que elementos são adicionados à lista, a capacidade dela aumenta automaticamente conforme necessário, realocando o vetor interno.
+/// </summary>
 public class CListaVet<T> : IEnumerable<T>
 {
-    private T[] Itens;
-    private int Qtde = 0;
+    private T[] _itens; // vetor que armazena os itens da lista
+    private int _quantidade; // número de elementos que a lista contém
+    private uint _versao; // atributo para impedir modificações durante loops foreach
+    private static readonly T[] s_vetorVazio = new T[0]; // o campo itens de listas vazias sempre apontará para este vetor
 
+    /// <summary>
+    /// Constrói uma lista inicialmente vazia com capacidade para 0 elementos.
+    /// Ao adicionar o primeiro elemento, a capacidade da lista aumenta para 6, e nas próximas realocações, dobra
+    /// </summary>
     public CListaVet()
     {
-        Itens = new T[6];
+        _itens = s_vetorVazio;
     }
 
+    /// <summary>
+    /// Constrói uma lista com uma capacidade definida.
+    /// A lista tem espaço para armazenar o número de elementos especificado antes que qualquer realocação seja necessária.
+    /// </summary>
+    /// <param name="tamanho"></param>
+    /// <exception cref="ArgumentException">
+    /// Lançada quando o tamanho é negativo.
+    /// </exception>
     public CListaVet(int tamanho)
     {
         if (tamanho < 0)
             throw new ArgumentException("A capacidade da lista não pode ser um número negativo.", nameof(tamanho));
 
-        Itens = new T[tamanho];
+        if(tamanho == 0)
+            _itens = s_vetorVazio;
+        else
+            _itens = new T[tamanho];
     }
 
-    public CListaVet(T[] vetor)
+    /// <summary>
+    /// Constrói uma lista, copiando o conteúdo de uma coleção fornecida.
+    /// A capacidade da nova lista será igual a quantidade de itens da coleção fornecida.
+    /// </summary>
+    /// <param name="colecao"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    public CListaVet(IEnumerable<T> colecao)
     {
-        Itens = new T[vetor.Length];
-        for (int i = 0; i < vetor.Length; i++)
+        if(colecao == null)
+            throw new ArgumentNullException(nameof(colecao), "A coleção a copiar não pode ser nula.");
+
+        if(colecao is ICollection<T> c)
         {
-            Itens[i] = vetor[i];
-            Qtde++;
+            int tamanho = c.Count;
+            if(tamanho == 0)
+                _itens = s_vetorVazio;
+            else
+            {
+                _itens = new T[tamanho];
+                c.CopyTo(_itens, 0);
+                _quantidade = tamanho;
+            }
+        }
+        else
+        {
+            _itens = s_vetorVazio;
+            foreach(T item in colecao)
+                Adiciona(item);
         }
     }
 
-    public CListaVet(CListaVet<T> lv)
+    private void Redimensiona(int tamanho)
     {
-        Itens = new T[lv.Qtde];
-        for (int i = 0; i < Itens.Length; i++)
+        if (tamanho == 0)
+            tamanho = 6;
+
+        if (tamanho != _itens.Length)
         {
-            Itens[i] = lv.Itens[i];
-            Qtde++;
+            T[] novoItens = new T[tamanho];
+            for (int i = 0; i < _quantidade; i++)
+                novoItens[i] = _itens[i];
+
+            _itens = novoItens;
         }
-    }
-
-    private void Redimenciona(int tamanho)
-    {
-        if (tamanho <= 0)
-            tamanho = 6; // impede que o novo vetor seja iniciado com comprimento inválido
-
-        T[] novoItens = new T[tamanho];
-        for (int i = 0; i < Qtde; i++)
-            novoItens[i] = Itens[i];
-
-        Itens = novoItens;
     }
 
     // altera ou retorna o valor de um índice especificado
@@ -56,43 +92,46 @@ public class CListaVet<T> : IEnumerable<T>
     {
         get
         {
-            if (posicao < 0 || posicao >= Qtde)
+            if (posicao < 0 || posicao >= _quantidade)
                 throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor que a quantidade de itens da lista.");
-            return Itens[posicao];
+            return _itens[posicao];
         }
         set
         {
-            if (posicao < 0 || posicao >= Qtde)
+            if (posicao < 0 || posicao >= _quantidade)
                 throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor que a quantidade de itens da lista.");
-            Itens[posicao] = value;
+            _itens[posicao] = value;
+            _versao++;
         }
     }
 
-    public bool Vazia() => Qtde == 0;
+    public bool Vazia() => _quantidade == 0;
 
     public void Adiciona(T elemento)
     {
-        if (Qtde == Itens.Length)
-            Redimenciona(Qtde * 2);
-        Itens[Qtde] = elemento;
-        Qtde++;
+        if (_quantidade == _itens.Length)
+            Redimensiona(_quantidade * 2);
+        _itens[_quantidade] = elemento;
+        _quantidade++;
+        _versao++;
     }
 
-    public void CortarExcessos() => Redimenciona(Qtde);
+    public void CortarExcessos() => Redimensiona(_quantidade);
 
     public void Remove(T elemento)
     {
         bool achou = false;
-        for (int i = 0; i < Qtde && !achou; i++)
+        for (int i = 0; i < _quantidade && !achou; i++)
         {
-            achou = EqualityComparer<T>.Default.Equals(Itens[i], elemento);
+            achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
             if (achou)
             {
-                for (int j = i; j < Qtde - 1; j++)
-                    Itens[j] = Itens[j + 1]; //desloca os elementos para a esquerda a partir da posição removida.
+                for (int j = i; j < _quantidade - 1; j++)
+                    _itens[j] = _itens[j + 1]; //desloca os elementos para a esquerda a partir da posição removida.
                 //libera a referência da cópia do último item para o GC (muito útil para objetos do tipo referência)
-                Itens[Qtde - 1] = default!;
-                Qtde--;
+                _itens[_quantidade - 1] = default!;
+                _quantidade--;
+                _versao++;
             }
         }
         if (!achou)
@@ -101,62 +140,66 @@ public class CListaVet<T> : IEnumerable<T>
 
     public void RemoveIndice(int posicao)
     {
-        if (posicao < 0 || posicao >= Qtde)
+        if (posicao < 0 || posicao >= _quantidade)
             throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor que a quantidade de itens da lista.");
-        for (int i = posicao; i < Qtde - 1; i++)
-            Itens[i] = Itens[i + 1]; //desloca os elementos para a esquerda a partir da posição removida.
-        Itens[Qtde - 1] = default!;
-        Qtde--;
+        for (int i = posicao; i < _quantidade - 1; i++)
+            _itens[i] = _itens[i + 1]; //desloca os elementos para a esquerda a partir da posição removida.
+        _itens[_quantidade - 1] = default!;
+        _quantidade--;
+        _versao++;
     }
 
     public void InsereIndice(T elemento, int posicao)
     {
-        if (posicao < 0 || posicao > Qtde)
+        if (posicao < 0 || posicao > _quantidade)
             throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor ou igual a quantidade de itens da lista.");
-        if (Qtde == Itens.Length)
-            Redimenciona(Qtde * 2);
-        for (int i = Qtde - 1; i >= posicao; i--)
-            Itens[i + 1] = Itens[i];
-        Itens[posicao] = elemento;
-        Qtde++;
+        if (_quantidade == _itens.Length)
+            Redimensiona(_quantidade * 2);
+        for (int i = _quantidade - 1; i >= posicao; i--)
+            _itens[i + 1] = _itens[i];
+        _itens[posicao] = elemento;
+        _quantidade++;
+        _versao++;
     }
 
     public void Inverte()
     {
         int inicio = 0;
-        int fim = Qtde - 1;
+        int fim = _quantidade - 1;
         while (inicio < fim)
         {
             // Troca os elementos das posições 'inicio' e 'fim'
-            T temp = Itens[inicio];
-            Itens[inicio] = Itens[fim];
-            Itens[fim] = temp;
+            T temp = _itens[inicio];
+            _itens[inicio] = _itens[fim];
+            _itens[fim] = temp;
             inicio++;
             fim--;
         }
+        _versao++;
     }
 
     public T[] ParaVetor()
     {
-        T[] vetor = new T[Qtde];
-        for (int i = 0; i < Qtde; i++)
-            vetor[i] = Itens[i];
+        T[] vetor = new T[_quantidade];
+        for (int i = 0; i < _quantidade; i++)
+            vetor[i] = _itens[i];
         return vetor;
     }
 
     public void InsereAntesDe(T elementoAInserir, T referencia)
     {
-        if (Qtde == Itens.Length)
-            Redimenciona(Qtde * 2);
-        for (int i = 0; i < Qtde; i++)
+        if (_quantidade == _itens.Length)
+            Redimensiona(_quantidade * 2);
+        for (int i = 0; i < _quantidade; i++)
         {
-            if (EqualityComparer<T>.Default.Equals(Itens[i], referencia))
+            if (EqualityComparer<T>.Default.Equals(_itens[i], referencia))
             {
                 // desloca os elementos a partir de i uma posição à direita
-                for (int j = Qtde - 1; j >= i; j--)
-                    Itens[j + 1] = Itens[j];
-                Itens[i] = elementoAInserir; // insere exatamente na posição do elemento de referência
-                Qtde++;
+                for (int j = _quantidade - 1; j >= i; j--)
+                    _itens[j + 1] = _itens[j];
+                _itens[i] = elementoAInserir; // insere exatamente na posição do elemento de referência
+                _quantidade++;
+                _versao++;
                 return;
             }
         }
@@ -165,17 +208,18 @@ public class CListaVet<T> : IEnumerable<T>
 
     public void InsereDepoisDe(T elementoAInserir, T referencia)
     {
-        if (Qtde == Itens.Length)
-            Redimenciona(Qtde * 2);
-        for (int i = 0; i < Qtde; i++)
+        if (_quantidade == _itens.Length)
+            Redimensiona(_quantidade * 2);
+        for (int i = 0; i < _quantidade; i++)
         {
-            if (EqualityComparer<T>.Default.Equals(Itens[i], referencia))
+            if (EqualityComparer<T>.Default.Equals(_itens[i], referencia))
             {
                 // desloca todos os elementos a partir de i+1
-                for (int j = Qtde - 1; j > i; j--)
-                    Itens[j + 1] = Itens[j];
-                Itens[i + 1] = elementoAInserir;
-                Qtde++;
+                for (int j = _quantidade - 1; j > i; j--)
+                    _itens[j + 1] = _itens[j];
+                _itens[i + 1] = elementoAInserir;
+                _quantidade++;
+                _versao++;
                 return;
             }
         }
@@ -184,8 +228,10 @@ public class CListaVet<T> : IEnumerable<T>
 
     public void Ordenar()
     {
-        if (Qtde > 1)
-            QuickSort(0, Qtde - 1);
+        if (_quantidade > 1)
+            QuickSort(0, _quantidade - 1);
+
+        _versao++;
     }
 
     private void QuickSort(int esq, int dir)
@@ -200,28 +246,28 @@ public class CListaVet<T> : IEnumerable<T>
 
     private int ParticionaHoare(int esq, int dir)
     {
-        T pivot = Itens[(esq + dir) / 2];
+        T pivot = _itens[(esq + dir) / 2];
         int i = esq - 1;
         int j = dir + 1;
         while (true)
         {
-            do { i++; } while (Comparer<T>.Default.Compare(Itens[i], pivot) < 0);
-            do { j--; } while (Comparer<T>.Default.Compare(Itens[j], pivot) > 0);
+            do { i++; } while (Comparer<T>.Default.Compare(_itens[i], pivot) < 0);
+            do { j--; } while (Comparer<T>.Default.Compare(_itens[j], pivot) > 0);
 
             if (i >= j)
                 return j;
 
             // swap
-            T temp = Itens[i];
-            Itens[i] = Itens[j];
-            Itens[j] = temp;
+            T temp = _itens[i];
+            _itens[i] = _itens[j];
+            _itens[j] = temp;
         }
     }
 
     public int PrimeiraOcorrenciaDe(T elemento)
     {
-        for (int i = 0; i < Qtde; i++)
-            if (EqualityComparer<T>.Default.Equals(Itens[i], elemento)) return i;
+        for (int i = 0; i < _quantidade; i++)
+            if (EqualityComparer<T>.Default.Equals(_itens[i], elemento)) return i;
 
         return -1;
     }
@@ -230,9 +276,9 @@ public class CListaVet<T> : IEnumerable<T>
     {
         int ocorrencia = 0;
         bool achou = false;
-        for (int i = 0; i < Qtde; i++)
+        for (int i = 0; i < _quantidade; i++)
         {
-            if (EqualityComparer<T>.Default.Equals(Itens[i], elemento))
+            if (EqualityComparer<T>.Default.Equals(_itens[i], elemento))
             {
                 achou = true;
                 ocorrencia = i; //armazena a posição do elemento se for encontrado
@@ -245,29 +291,36 @@ public class CListaVet<T> : IEnumerable<T>
     public bool Contem(T elemento)
     {
         bool achou = false;
-        for (int i = 0; i < Qtde && !achou; i++)
-            achou = EqualityComparer<T>.Default.Equals(Itens[i], elemento);
+        for (int i = 0; i < _quantidade && !achou; i++)
+            achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
         return achou;
     }
 
     public void Limpar()
     {
-        int limite = Qtde;
+        int limite = _quantidade;
         for (int i = 0; i < limite; i++)
         {
-            Itens[i] = default!;
-            Qtde--;
+            _itens[i] = default!;
+            _quantidade--;
         }
+        _versao++;
     }
 
-    public int Quantidade => Qtde;
+    public int Quantidade => _quantidade;
 
-    public int Capacidade => Itens.Length;
+    public int Capacidade => _itens.Length;
 
     public IEnumerator<T> GetEnumerator()
     {
-        for (int i = 0; i < Qtde; i++)
-            yield return Itens[i];
+        uint versao = _versao;
+        for (int i = 0; i < _quantidade; i++)
+        {
+            if(versao != _versao)
+                throw new InvalidOperationException("A lista foi modificada. Enumeração cancelada.");
+
+            yield return _itens[i];
+        }
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
