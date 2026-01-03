@@ -27,15 +27,15 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     /// A lista tem espaço para armazenar o número de elementos especificado antes que qualquer realocação seja necessária.
     /// </summary>
     /// <param name="tamanho"></param>
-    /// <exception cref="ArgumentException">
+    /// <exception cref="ArgumentOutOfRangeException">
     /// Lançada quando o tamanho é negativo.
     /// </exception>
     public CListaVet(int tamanho)
     {
         if (tamanho < 0)
-            throw new ArgumentException("A capacidade da lista não pode ser um número negativo.", nameof(tamanho));
+            throw new ArgumentOutOfRangeException(nameof(tamanho), "A capacidade da lista não pode ser um número negativo.");
 
-        if(tamanho == 0)
+        if (tamanho == 0)
             _itens = s_vetorVazio;
         else
             _itens = new T[tamanho];
@@ -43,19 +43,19 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     /// <summary>
     /// Constrói uma lista, copiando o conteúdo de uma coleção fornecida.
-    /// A capacidade da nova lista será igual a quantidade de itens da coleção fornecida.
+    /// A capacidade da nova lista será igual a quantidade de itens da coleção.
     /// </summary>
     /// <param name="colecao"></param>
     /// <exception cref="ArgumentNullException"></exception>
     public CListaVet(IEnumerable<T> colecao)
     {
-        if(colecao == null)
+        if (colecao == null)
             throw new ArgumentNullException(nameof(colecao), "A coleção a copiar não pode ser nula.");
 
-        if(colecao is ICollection<T> c)
+        if (colecao is ICollection<T> c)
         {
             int tamanho = c.Count;
-            if(tamanho == 0)
+            if (tamanho == 0)
                 _itens = s_vetorVazio;
             else
             {
@@ -67,23 +67,33 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         else
         {
             _itens = s_vetorVazio;
-            foreach(T item in colecao)
+            foreach (T item in colecao)
                 Adiciona(item);
         }
     }
 
+    private int CalcularCapacidade(int capacidade)
+    {
+        int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
+        if(novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
+        if(novaCapacidade < capacidade) novaCapacidade = capacidade;
+        return novaCapacidade;
+    }
+
     private void Redimensiona(int tamanho)
     {
-        if (tamanho == 0)
-            tamanho = 6;
-
         if (tamanho != _itens.Length)
         {
-            T[] novoItens = new T[tamanho];
-            for (int i = 0; i < _quantidade; i++)
-                novoItens[i] = _itens[i];
+            if (tamanho > 0)
+            {
+                T[] novoItens = new T[tamanho];
+                for (int i = 0; i < _quantidade; i++)
+                    novoItens[i] = _itens[i];
 
-            _itens = novoItens;
+                _itens = novoItens;
+            }
+            else
+                _itens = s_vetorVazio;
         }
     }
 
@@ -110,7 +120,8 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     public void Adiciona(T elemento)
     {
         if (_quantidade == _itens.Length)
-            Redimensiona(_quantidade * 2);
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
+
         _itens[_quantidade] = elemento;
         _quantidade++;
         _versao++;
@@ -140,6 +151,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     {
         if (posicao < 0 || posicao >= _quantidade)
             throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor que a quantidade de itens da lista.");
+
         for (int i = posicao; i < _quantidade - 1; i++)
             _itens[i] = _itens[i + 1]; //desloca os elementos para a esquerda a partir da posição removida.
         _itens[_quantidade - 1] = default!;
@@ -151,8 +163,9 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     {
         if (posicao < 0 || posicao > _quantidade)
             throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor ou igual a quantidade de itens da lista.");
+
         if (_quantidade == _itens.Length)
-            Redimensiona(_quantidade * 2);
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
         for (int i = _quantidade - 1; i >= posicao; i--)
             _itens[i + 1] = _itens[i];
         _itens[posicao] = elemento;
@@ -187,7 +200,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     public void InsereAntesDe(T elementoAInserir, T referencia)
     {
         if (_quantidade == _itens.Length)
-            Redimensiona(_quantidade * 2);
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
         for (int i = 0; i < _quantidade; i++)
         {
             if (EqualityComparer<T>.Default.Equals(_itens[i], referencia))
@@ -207,7 +220,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     public void InsereDepoisDe(T elementoAInserir, T referencia)
     {
         if (_quantidade == _itens.Length)
-            Redimensiona(_quantidade * 2);
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
         for (int i = 0; i < _quantidade; i++)
         {
             if (EqualityComparer<T>.Default.Equals(_itens[i], referencia))
@@ -307,14 +320,24 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     public int Quantidade => _quantidade;
 
-    public int Capacidade => _itens.Length;
+    public int Capacidade
+    {
+        get => _itens.Length;
+        set
+        {
+            if(value < _quantidade)
+                throw new ArgumentOutOfRangeException(nameof(value), "A nova capacidade não pode ser menor que a quantidade de itens.");
+
+            Redimensiona(value);
+        }
+    }
 
     public IEnumerator<T> GetEnumerator()
     {
         uint versao = _versao;
         for (int i = 0; i < _quantidade; i++)
         {
-            if(versao != _versao)
+            if (versao != _versao)
                 throw new InvalidOperationException("A lista foi modificada. Enumeração cancelada.");
 
             yield return _itens[i];
@@ -332,7 +355,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     void ICollection<T>.CopyTo(T[] array, int arrayIndex)
     {
-        for(int i = 0; i < _quantidade; i++)
+        for (int i = 0; i < _quantidade; i++)
             array[arrayIndex + i] = _itens[i];
     }
 
