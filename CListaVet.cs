@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// A lista tem uma capacidade, que é o comprimento do vetor interno.
 /// A medida que elementos são adicionados à lista, a capacidade dela aumenta automaticamente conforme necessário, realocando o vetor interno.
 /// </summary>
-public class CListaVet<T> : IEnumerable<T>
+public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 {
     private T[] _itens; // vetor que armazena os itens da lista
     private int _quantidade; // número de elementos que a lista contém
@@ -118,13 +118,11 @@ public class CListaVet<T> : IEnumerable<T>
 
     public void CortarExcessos() => Redimensiona(_quantidade);
 
-    public void Remove(T elemento)
+    public bool Remove(T elemento)
     {
-        bool achou = false;
-        for (int i = 0; i < _quantidade && !achou; i++)
+        for (int i = 0; i < _quantidade; i++)
         {
-            achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
-            if (achou)
+            if (EqualityComparer<T>.Default.Equals(_itens[i], elemento))
             {
                 for (int j = i; j < _quantidade - 1; j++)
                     _itens[j] = _itens[j + 1]; //desloca os elementos para a esquerda a partir da posição removida.
@@ -132,10 +130,10 @@ public class CListaVet<T> : IEnumerable<T>
                 _itens[_quantidade - 1] = default!;
                 _quantidade--;
                 _versao++;
+                return true;
             }
         }
-        if (!achou)
-            throw new ArgumentException("Elemento não encontrado.", nameof(elemento));
+        return false;
     }
 
     public void RemoveIndice(int posicao)
@@ -324,4 +322,21 @@ public class CListaVet<T> : IEnumerable<T>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    // Implementação explícita da interface ICollection (métodos são acessíveis apenas via interface)
+    void ICollection<T>.Add(T item) => Adiciona(item);
+
+    void ICollection<T>.Clear() => Limpar();
+
+    bool ICollection<T>.Contains(T item) => Contem(item);
+
+    void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+    {
+        for(int i = 0; i < _quantidade; i++)
+            array[arrayIndex + i] = _itens[i];
+    }
+
+    int ICollection<T>.Count => _quantidade;
+
+    bool ICollection<T>.IsReadOnly => false;
 }

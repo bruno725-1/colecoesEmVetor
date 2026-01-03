@@ -4,11 +4,13 @@ class Teste
 {
     public static void Rodar()
     {
-        List<int> ints = new List<int>(30);
-        for(int i = 1; i <= 30; i++)
-            ints.Add(i);
-        List<int> ints1 = null;
-        CListaVet<int> lista = new CListaVet<int>(ints1);
-        Console.WriteLine($"Último item da lista: {lista[lista.Quantidade - 1]}");
+        CListaVet<int> lista = new CListaVet<int>();
+        lista.Adiciona(3);
+        lista.Adiciona(48);
+        ICollection<int> collection = lista;
+        Console.WriteLine(string.Join(", ", collection));
+        collection.Clear();
+        Console.WriteLine("Lista após Clear executado via ICollection:");
+        Console.WriteLine(string.Join(", ", collection));
     }
 }
