@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("colecoesEmVetor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3aff4f12d80ba727641eeaadb4c19233e57663a8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a411bdecd7dc1b1926a81cc3fe03cb022bd15fcf")]
 [assembly: System.Reflection.AssemblyProductAttribute("colecoesEmVetor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("colecoesEmVetor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
