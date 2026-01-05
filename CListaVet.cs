@@ -75,8 +75,8 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     private int CalcularCapacidade(int capacidade)
     {
         int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
-        if(novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
-        if(novaCapacidade < capacidade) novaCapacidade = capacidade;
+        if (novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
+        if (novaCapacidade < capacidade) novaCapacidade = capacidade;
         return novaCapacidade;
     }
 
@@ -318,6 +318,27 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         _versao++;
     }
 
+    public void AdicionaFaixa(IEnumerable<T> colecao)
+    {
+        if (colecao == null)
+            throw new ArgumentNullException(nameof(colecao), "A coleção a adicionar não pode ser nula.");
+
+        if (colecao is ICollection<T> c)
+        {
+            int tamanho = c.Count;
+            if (_quantidade + tamanho > _itens.Length)
+                Redimensiona(CalcularCapacidade(_quantidade + tamanho));
+            c.CopyTo(_itens, _quantidade);
+            _quantidade += tamanho;
+            _versao++;
+        }
+        else
+        {
+            foreach (T item in colecao)
+                Adiciona(item);
+        }
+    }
+
     public int Quantidade => _quantidade;
 
     public int Capacidade
@@ -325,7 +346,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         get => _itens.Length;
         set
         {
-            if(value < _quantidade)
+            if (value < _quantidade)
                 throw new ArgumentOutOfRangeException(nameof(value), "A nova capacidade não pode ser menor que a quantidade de itens.");
 
             Redimensiona(value);

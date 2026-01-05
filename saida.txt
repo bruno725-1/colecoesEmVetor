@@ -1,5 +1,0 @@
-Valor de a: 2147483647
-Valor de b: -1547483649
-Valor do uint b: 2747483647
-b é maior que a? False
-O uint b é maior que a? True
