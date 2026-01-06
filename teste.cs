@@ -5,16 +5,26 @@ class Teste
 {
     public static void Rodar()
     {
-        int a = Array.MaxLength;
-        CListaVet<byte> lista = new CListaVet<byte>(a);
-        for(int i = 0; i < a; i++)
-            lista.Adiciona(48);
-        Console.WriteLine("Aperte qualquer tecla para ver tudo explodir");
-        Console.ReadKey();
-        lista.Adiciona(48);
-        CLista<byte> lista2 = new CLista<byte>();
-        for(int i = 0; i < 600; i++)
-            lista2.InsereFim(48);
-        lista.AdicionaFaixa(lista2);
+        CListaVet<int> lista = new CListaVet<int>(10);
+        for(int i = 1; i <= 10; i++)
+            lista.Adiciona(i);
+        Console.WriteLine(string.Join(", ", lista));
+        lista.RemoveFaixa(2, 8);
+        Console.WriteLine("Lista após RemoveFaixa:");
+        Console.WriteLine(string.Join(", ", lista));
+        Console.WriteLine($"Quantidade de elementos: {lista.Quantidade}");
+        int[] vetor = {3, 4, 5, 6, 7, 8, 9, 10};
+        lista.AdicionaFaixa(vetor);
+        Console.WriteLine($"Quantidade de elementos: {lista.Quantidade}");
+        Console.WriteLine($"Capacidade da lista: {lista.Capacidade}");
+        Console.WriteLine(string.Join(", ", lista));
+        lista.Limpar();
+        Console.WriteLine($"Quantidade de elementos após limpar: {lista.Quantidade}");
+        Console.WriteLine($"Capacidade da lista: {lista.Capacidade}");
+        lista.CortarExcessos();
+        Console.WriteLine($"Capacidade da lista após cortar excessos: {lista.Capacidade}");
+        lista.Adiciona(2026);
+        Console.WriteLine($"Quantidade de elementos após adicionar: {lista.Quantidade}");
+        Console.WriteLine($"Capacidade da lista: {lista.Capacidade}");
     }
 }

@@ -74,17 +74,16 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     private int CalcularCapacidade(int capacidade)
     {
-        Console.WriteLine($"Parâmetro recebido: {capacidade}");
         int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
-        if (novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
+        if ((uint) novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
+        // se a capacidade calculada for menor que o necessário, seta o parâmetro original como nova capacidade. É mais provável que essa condição seja verdadeira em adições em lote
+        // Se a capacidade exceder Array.MaxLength, ocorrerá OutOfMemoryException
         if (novaCapacidade < capacidade) novaCapacidade = capacidade;
-        Console.WriteLine($"Nova capacidade: {novaCapacidade}");
         return novaCapacidade;
     }
 
     private void Redimensiona(int tamanho)
     {
-        Console.WriteLine("Redimensiona ativo...");
         if (tamanho != _itens.Length)
         {
             if (tamanho > 0)
@@ -96,12 +95,8 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
                 _itens = novoItens;
             }
             else
-            {
                 _itens = s_vetorVazio;
-                Console.WriteLine("Deslocado para vetor vazio");
-            }
         }
-        Console.WriteLine("Redimensiona finalizado");
     }
 
     // altera ou retorna o valor de um índice especificado
@@ -126,18 +121,12 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     public void Adiciona(T elemento)
     {
-        if (_quantidade == Array.MaxLength)
-        {
-            Console.WriteLine("Adiciona ativo...");
-        }
         if (_quantidade == _itens.Length)
-            Redimensiona(CalcularCapacidade(_quantidade * 2));
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
 
         _itens[_quantidade] = elemento;
         _quantidade++;
         _versao++;
-        if(_quantidade == Array.MaxLength)
-            Console.WriteLine("Adiciona finalizado");
     }
 
     public void CortarExcessos() => Redimensiona(_quantidade);
@@ -322,12 +311,10 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     public void Limpar()
     {
-        int limite = _quantidade;
-        for (int i = 0; i < limite; i++)
-        {
+        for (int i = 0; i < _quantidade; i++)
             _itens[i] = default!;
-            _quantidade--;
-        }
+
+        _quantidade = 0;
         _versao++;
     }
 
@@ -341,8 +328,8 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
             int tamanho = c.Count;
             if (tamanho > 0)
             {
-                if (_quantidade + tamanho > _itens.Length)
-                    Redimensiona(CalcularCapacidade(_quantidade + tamanho));
+                if (_itens.Length - _quantidade < tamanho)
+                    Redimensiona(CalcularCapacidade(checked(_quantidade + tamanho)));
 
                 c.CopyTo(_itens, _quantidade);
                 _quantidade += tamanho;
@@ -354,6 +341,26 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
             foreach (T item in colecao)
                 Adiciona(item);
         }
+    }
+
+    public void RemoveFaixa(int posicao, int quantidade)
+    {
+        if(posicao < 0 || posicao >= _quantidade)
+            throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor que a quantidade de itens da lista.");
+        if(quantidade < 0)
+            throw new ArgumentOutOfRangeException(nameof(quantidade), "A quantidade de itens a serem removidos não pode ser um número negativo.");
+        if(posicao + quantidade > _quantidade)
+            throw new ArgumentException("A soma entre a posição e a quantidade de itens a remover não pode ser maior que a quantidade de itens da lista.");
+
+        for(int i = posicao; i < posicao + quantidade; i++)
+            _itens[i] = default!;
+        for(int i = posicao + quantidade; i < _quantidade; i++)
+        {
+            _itens[i - quantidade] = _itens[i];
+            _itens[i] = default!;
+        }
+        _quantidade -= quantidade;
+        _versao++;
     }
 
     public int Quantidade => _quantidade;
