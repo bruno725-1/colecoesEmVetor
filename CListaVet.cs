@@ -74,14 +74,17 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     private int CalcularCapacidade(int capacidade)
     {
+        Console.WriteLine($"Parâmetro recebido: {capacidade}");
         int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
         if (novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
         if (novaCapacidade < capacidade) novaCapacidade = capacidade;
+        Console.WriteLine($"Nova capacidade: {novaCapacidade}");
         return novaCapacidade;
     }
 
     private void Redimensiona(int tamanho)
     {
+        Console.WriteLine("Redimensiona ativo...");
         if (tamanho != _itens.Length)
         {
             if (tamanho > 0)
@@ -93,8 +96,12 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
                 _itens = novoItens;
             }
             else
+            {
                 _itens = s_vetorVazio;
+                Console.WriteLine("Deslocado para vetor vazio");
+            }
         }
+        Console.WriteLine("Redimensiona finalizado");
     }
 
     // altera ou retorna o valor de um índice especificado
@@ -119,12 +126,18 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     public void Adiciona(T elemento)
     {
+        if (_quantidade == Array.MaxLength)
+        {
+            Console.WriteLine("Adiciona ativo...");
+        }
         if (_quantidade == _itens.Length)
-            Redimensiona(CalcularCapacidade(_quantidade + 1));
+            Redimensiona(CalcularCapacidade(_quantidade * 2));
 
         _itens[_quantidade] = elemento;
         _quantidade++;
         _versao++;
+        if(_quantidade == Array.MaxLength)
+            Console.WriteLine("Adiciona finalizado");
     }
 
     public void CortarExcessos() => Redimensiona(_quantidade);
@@ -326,11 +339,15 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         if (colecao is ICollection<T> c)
         {
             int tamanho = c.Count;
-            if (_quantidade + tamanho > _itens.Length)
-                Redimensiona(CalcularCapacidade(_quantidade + tamanho));
-            c.CopyTo(_itens, _quantidade);
-            _quantidade += tamanho;
-            _versao++;
+            if (tamanho > 0)
+            {
+                if (_quantidade + tamanho > _itens.Length)
+                    Redimensiona(CalcularCapacidade(_quantidade + tamanho));
+
+                c.CopyTo(_itens, _quantidade);
+                _quantidade += tamanho;
+                _versao++;
+            }
         }
         else
         {
