@@ -1,0 +1,27 @@
+Imprimindo a pilha original:
+10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+Escreve um número
+1122
+Escreve um número
+4437
+Escreve um número
+2001
+Escreve um número
+2003
+Escreve um número
+2006
+Escreve um número
+2007
+Escreve um número
+3437
+Escreve um número
+9987
+Escreve um número
+3616
+Escreve um número
+11222
+Imprimindo a pilha modificada:
+11222, 9, 8, 7, 6, 5, 4, 3, 2, 1
+Provavelmente a pilha foi modificada, não tenho certeza, mas se sim:
+Hahahahahahahahaha! Modifiquei a pilha e o enumerador nem percebeu
+É por isso que se precisa de atributo de versão, mesmo em coleções como pilhas e filas, que não se pode alterar os itens por índice harbitrário

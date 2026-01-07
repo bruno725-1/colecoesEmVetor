@@ -76,8 +76,8 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     {
         int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
         if ((uint) novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
-        // se a capacidade calculada for menor que o necessário, seta o parâmetro original como nova capacidade. É mais provável que essa condição seja verdadeira em adições em lote
-        // Se a capacidade exceder Array.MaxLength, ocorrerá OutOfMemoryException
+        // se a capacidade calculada for menor que o necessário, seta o parâmetro original como nova capacidade. É mais provável que essa condição seja verdadeira em casos de adição em lote.
+        // Se a capacidade exceder Array.MaxLength, ocorrerá OutOfMemoryException.
         if (novaCapacidade < capacidade) novaCapacidade = capacidade;
         return novaCapacidade;
     }
@@ -116,8 +116,6 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
             _versao++;
         }
     }
-
-    public bool Vazia() => _quantidade == 0;
 
     public void Adiciona(T elemento)
     {
@@ -376,6 +374,8 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
             Redimensiona(value);
         }
     }
+
+    public bool Vazia => _quantidade == 0;
 
     public IEnumerator<T> GetEnumerator()
     {

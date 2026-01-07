@@ -1,30 +1,32 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AED;
 class Teste
 {
     public static void Rodar()
     {
-        CListaVet<int> lista = new CListaVet<int>(10);
+        CLista<int> lista = new CLista<int>();
         for(int i = 1; i <= 10; i++)
-            lista.Adiciona(i);
-        Console.WriteLine(string.Join(", ", lista));
-        lista.RemoveFaixa(2, 8);
-        Console.WriteLine("Lista após RemoveFaixa:");
-        Console.WriteLine(string.Join(", ", lista));
-        Console.WriteLine($"Quantidade de elementos: {lista.Quantidade}");
-        int[] vetor = {3, 4, 5, 6, 7, 8, 9, 10};
-        lista.AdicionaFaixa(vetor);
-        Console.WriteLine($"Quantidade de elementos: {lista.Quantidade}");
-        Console.WriteLine($"Capacidade da lista: {lista.Capacidade}");
-        Console.WriteLine(string.Join(", ", lista));
-        lista.Limpar();
-        Console.WriteLine($"Quantidade de elementos após limpar: {lista.Quantidade}");
-        Console.WriteLine($"Capacidade da lista: {lista.Capacidade}");
-        lista.CortarExcessos();
-        Console.WriteLine($"Capacidade da lista após cortar excessos: {lista.Capacidade}");
-        lista.Adiciona(2026);
-        Console.WriteLine($"Quantidade de elementos após adicionar: {lista.Quantidade}");
-        Console.WriteLine($"Capacidade da lista: {lista.Capacidade}");
+            lista.InsereFim(i);
+        CPilhaVet<int> pilha = new CPilhaVet<int>(lista);
+        Console.WriteLine("Imprimindo a pilha original:");
+        Console.WriteLine(string.Join(", ", pilha));
+        foreach(var item in pilha)
+        {
+            pilha.Desempilha();
+            Console.WriteLine("Escreve um número");
+            int num = int.Parse(Console.ReadLine());
+            pilha.Empilha(num);
+        }
+        Console.WriteLine("Imprimindo a pilha modificada:");
+        Console.WriteLine(string.Join(", ", pilha));
+        Console.WriteLine($"Provavelmente a pilha foi modificada, não tenho certeza, mas se sim:");
+        Console.WriteLine("Hahahahahahahahaha! Modifiquei a pilha e o enumerador nem percebeu");
+        Console.WriteLine("É por isso que se precisa de atributo de versão, mesmo em coleções como pilhas e filas, que não se pode alterar os itens por índice harbitrário");
+        /*int[] vetor = pilha.ToArray();
+        Console.WriteLine("Imprimindo o vetor:");
+        Console.WriteLine(string.Join(", ", vetor));
+        Console.WriteLine($"Capacidade da pilha: {pilha.Capacity}");*/
     }
 }
