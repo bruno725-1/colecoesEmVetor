@@ -304,6 +304,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         bool achou = false;
         for (int i = 0; i < _quantidade && !achou; i++)
             achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
+
         return achou;
     }
 

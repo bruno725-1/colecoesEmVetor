@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Intrinsics.Arm;
 ///<summary>
 /// Classe CPilhaVet - implementa uma lista LIFO: last-in first-out
 /// Internamente, a classe utiliza um vetor para armazenar os itens, então empilhar pode ser o(n), enquanto desempilhar sempre será o(1)
@@ -31,10 +32,10 @@ public class CPilhaVet<T> : IEnumerable<T>
     /// </exception>
     public CPilhaVet(int tamanho)
     {
-        if(tamanho < 0)
+        if (tamanho < 0)
             throw new ArgumentOutOfRangeException(nameof(tamanho), "A capacidade da pilha não pode ser um número negativo.");
 
-        if(tamanho == 0)
+        if (tamanho == 0)
             _itens = s_vetorVazio;
         else
             _itens = new T[tamanho];
@@ -48,13 +49,13 @@ public class CPilhaVet<T> : IEnumerable<T>
     /// <exception cref="ArgumentNullException"></exception>
     public CPilhaVet(IEnumerable<T> colecao)
     {
-        if(colecao == null)
+        if (colecao == null)
             throw new ArgumentNullException(nameof(colecao), "A coleção a copiar não pode ser nula.");
 
-        if(colecao is ICollection<T> c)
+        if (colecao is ICollection<T> c)
         {
             int tamanho = c.Count;
-            if(tamanho > 0)
+            if (tamanho > 0)
             {
                 _itens = new T[tamanho];
                 c.CopyTo(_itens, 0);
@@ -66,7 +67,7 @@ public class CPilhaVet<T> : IEnumerable<T>
         else
         {
             _itens = s_vetorVazio;
-            foreach(T item in colecao)
+            foreach (T item in colecao)
                 Empilha(item);
         }
     }
@@ -100,7 +101,7 @@ public class CPilhaVet<T> : IEnumerable<T>
 
     public void Empilha(T elemento)
     {
-        if(_quantidade == _itens.Length)
+        if (_quantidade == _itens.Length)
             Redimensiona(CalcularCapacidade(_quantidade + 1));
 
         _itens[_quantidade] = elemento;
@@ -110,11 +111,70 @@ public class CPilhaVet<T> : IEnumerable<T>
 
     public T Desempilha()
     {
+        if (_quantidade == 0)
+            throw new InvalidOperationException("Pilha vazia.");
+
         _quantidade--;
         T item = _itens[_quantidade];
         _itens[_quantidade] = default!;
         _versao++;
         return item;
+    }
+
+    public T Peek()
+    {
+        if (_quantidade == 0)
+            throw new InvalidOperationException("Pilha vazia.");
+
+        return _itens[_quantidade - 1];
+    }
+
+    public bool Contem(T elemento)
+    {
+        bool achou = false;
+        for (int i = 0; i < _quantidade && !achou; i++)
+            achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
+
+        return achou;
+    }
+
+    // Copia a pilha para um vetor, na mesma ordem que os itens seriam desempilhados.
+    public T[] ParaVetor()
+    {
+        T[] vetor = new T[_quantidade];
+        for (int i = 0; i < _quantidade; i++)
+            vetor[i] = _itens[_quantidade - i - 1];
+
+        return vetor;
+    }
+
+    /// <summary>
+    /// Copia os itens das duas pilhas recebidas como parâmetro para uma única pilha.
+    /// Dentro da pilha resultante, a ordem de cada pilha original é invertida, mas a sequência p1 seguida de p2 é mantida.
+    /// </summary>
+    public static CPilhaVet<T> ConcatenaPilha(CPilhaVet<T> p1, CPilhaVet<T> p2)
+    {
+        if(p1 == null)
+            throw new ArgumentNullException(nameof(p1), "Nenhuma das pilhas a concatenar pode ser nula.");
+        if(p2 == null)
+            throw new ArgumentNullException(nameof(p2), "Nenhuma das pilhas a concatenar pode ser nula.");
+
+        CPilhaVet<T> concatenada = new CPilhaVet<T>(checked(p1._quantidade + p2._quantidade));
+        foreach (T item in p1)
+            concatenada.Empilha(item);
+        foreach (T item in p2)
+            concatenada.Empilha(item);
+
+        return concatenada;
+    }
+
+    public void Limpar()
+    {
+        for(int i = 0; i < _quantidade; i++)
+            _itens[i] = default!;
+
+        _quantidade = 0;
+        _versao++;
     }
 
     public int Capacidade => _itens.Length;
