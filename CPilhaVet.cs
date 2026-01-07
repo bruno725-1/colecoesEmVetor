@@ -9,6 +9,7 @@ public class CPilhaVet<T> : IEnumerable<T>
 {
     private T[] _itens; // vetor que armazena os itens da pilha
     private int _quantidade; // número de itens que a pilha contém
+    private uint _versao; // atributo para impedir modificações durante loops foreach
     private static readonly T[] s_vetorVazio = new T[0]; // o campo itens de pilhas vazias sempre apontará para este vetor
 
     /// <summary>
@@ -104,6 +105,7 @@ public class CPilhaVet<T> : IEnumerable<T>
 
         _itens[_quantidade] = elemento;
         _quantidade++;
+        _versao++;
     }
 
     public T Desempilha()
@@ -111,6 +113,7 @@ public class CPilhaVet<T> : IEnumerable<T>
         _quantidade--;
         T item = _itens[_quantidade];
         _itens[_quantidade] = default!;
+        _versao++;
         return item;
     }
 
@@ -122,10 +125,10 @@ public class CPilhaVet<T> : IEnumerable<T>
 
     public IEnumerator<T> GetEnumerator()
     {
-        int quantidade = _quantidade;
+        uint versao = _versao;
         for (int i = _quantidade - 1; i >= 0; i--)
         {
-            if (quantidade != _quantidade)
+            if (versao != _versao)
                 throw new InvalidOperationException("A pilha foi modificada. Enumeração cancelada.");
 
             yield return _itens[i];
