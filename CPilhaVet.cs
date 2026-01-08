@@ -1,12 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.Intrinsics.Arm;
 ///<summary>
 /// Classe CPilhaVet - implementa uma lista LIFO: last-in first-out
 /// Internamente, a classe utiliza um vetor para armazenar os itens, então empilhar pode ser o(n), enquanto desempilhar sempre será o(1)
 /// </summary>
-public class CPilhaVet<T> : IEnumerable<T>
+public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
 {
     private T[] _itens; // vetor que armazena os itens da pilha
     private int _quantidade; // número de itens que a pilha contém
@@ -121,12 +120,37 @@ public class CPilhaVet<T> : IEnumerable<T>
         return item;
     }
 
+    public bool TentaDesempilhar(out T resultado)
+    {
+        if(_quantidade == 0)
+        {
+            resultado = default!;
+            return false;
+        }
+        _quantidade--;
+        resultado = _itens[_quantidade];
+        _itens[_quantidade] = default!;
+        _versao++;
+        return true;
+    }
+
     public T Peek()
     {
         if (_quantidade == 0)
             throw new InvalidOperationException("Pilha vazia.");
 
         return _itens[_quantidade - 1];
+    }
+
+    public bool TryPeek(out T resultado)
+    {
+        if(_quantidade == 0)
+        {
+            resultado = default!;
+            return false;
+        }
+        resultado = _itens[_quantidade - 1];
+        return true;
     }
 
     public bool Contem(T elemento)
@@ -137,6 +161,8 @@ public class CPilhaVet<T> : IEnumerable<T>
 
         return achou;
     }
+
+    public void CortarExcessos() => Redimensiona(_quantidade);
 
     // Copia a pilha para um vetor, na mesma ordem que os itens seriam desempilhados.
     public T[] ParaVetor()
@@ -196,4 +222,23 @@ public class CPilhaVet<T> : IEnumerable<T>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    // Implementação explícita da interface ICollection (métodos são acessíveis apenas via interface)
+    void ICollection<T>.Add(T item) => Empilha(item); // insere o item no topo da pilha
+
+    void ICollection<T>.Clear() => Limpar();
+
+    bool ICollection<T>.Contains(T item) => Contem(item);
+
+    void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+    {
+        for (int i = 0; i < _quantidade; i++)
+            array[arrayIndex + i] = _itens[i];
+    }
+
+    int ICollection<T>.Count => _quantidade;
+
+    bool ICollection<T>.IsReadOnly => false;
+
+    bool ICollection<T>.Remove(T item) => throw new NotSupportedException("Não é possível remover itens de forma harbitrária.");
 }
