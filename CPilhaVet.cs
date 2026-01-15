@@ -207,7 +207,7 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
 
     public int Quantidade => _quantidade;
 
-    public bool Vazia => _quantidade == 0;
+    public bool EstaVazia => _quantidade == 0;
 
     public IEnumerator<T> GetEnumerator()
     {
@@ -233,7 +233,7 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
     void ICollection<T>.CopyTo(T[] array, int arrayIndex)
     {
         for (int i = 0; i < _quantidade; i++)
-            array[arrayIndex + i] = _itens[i];
+            array[arrayIndex + i] = _itens[_quantidade - i - 1];
     }
 
     int ICollection<T>.Count => _quantidade;

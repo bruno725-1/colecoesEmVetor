@@ -376,7 +376,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         }
     }
 
-    public bool Vazia => _quantidade == 0;
+    public bool EstaVazia => _quantidade == 0;
 
     public IEnumerator<T> GetEnumerator()
     {
