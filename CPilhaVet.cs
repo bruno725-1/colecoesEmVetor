@@ -74,6 +74,8 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
     private int CalcularCapacidade(int capacidade)
     {
         int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
+        // Permite que a pilha cresça o máximo possível, antes de ocorrer overflow.
+        // Esta checagem funciona mesmo quando a nova capacidade sofreu overflow, graças ao casting para uint.
         if ((uint) novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
         // se a capacidade calculada for menor que o necessário, seta o parâmetro original como nova capacidade.
         // Se a capacidade exceder Array.MaxLength, ocorrerá OutOfMemoryException.
