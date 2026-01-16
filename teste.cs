@@ -6,29 +6,20 @@ class Teste
     public static void Rodar()
     {
         CFilaVet<int> fila = new CFilaVet<int>();
-        fila.Enfileira(1);
-        fila.Enfileira(2);
-        fila.Enfileira(3);
-        fila.Enfileira(4);
-        Console.WriteLine("Desenfileirando:");
-        Console.WriteLine(fila.Desenfileira());
-        Console.WriteLine(fila.Desenfileira());
-        fila.Enfileira(5);
-        fila.Enfileira(6);
-        fila.Enfileira(7); // aqui força wrap-around
-        Console.WriteLine($"Quantidade de itens: {fila.Quantidade}");
-        Console.WriteLine($"Capacidade: {fila.Capacidade}");
-        fila.Enfileira(8);
-        Console.WriteLine($"Quantidade de itens: {fila.Quantidade}");
-        Console.WriteLine($"Capacidade: {fila.Capacidade}");
-        /*Console.WriteLine("Desenfileirando a porra toda:");
+        for(int i = 1; i <= 6; i++)
+            fila.Enfileira(i);
+
+        for(int i = 0; i < 3; i++)
+            fila.Desenfileira();
+
+        Console.WriteLine($"Frente da fila: {fila._frente}");
+        Console.WriteLine($"Trás da fila: {fila._tras}");
+        int[] vetor = fila.ParaVetor();
+
+        Console.WriteLine("Imprimindo o vetor:");
+        Console.WriteLine(string.Join(", ", vetor));
+        Console.WriteLine($"Imprimindo a fila:");
         while(fila.Quantidade > 0)
-            Console.Write(fila.Desenfileira() + ", ");*/
-        fila.Enfileira(9);
-        Console.WriteLine($"Quantidade de itens: {fila.Quantidade}");
-        Console.WriteLine($"Capacidade: {fila.Capacidade}");
-        Console.WriteLine("Desenfileirando a porra toda:");
-        while(fila.Quantidade > 0)
-            Console.Write(fila.Desenfileira() + ", ");
+        Console.Write(fila.Desenfileira() + ", ");
     }
 }

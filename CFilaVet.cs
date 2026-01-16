@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections;
 using System.Collections.Generic;
 /// <summary>
@@ -162,7 +162,39 @@ class CFilaVet<T>
         return _itens[_frente];
     }
 
+    public T[] ParaVetor()
+    {
+        T[] vetor = new T[_quantidade];
+        if (_frente < _tras)
+            Copiar(_frente, vetor, 0, _quantidade);
+        else
+        {
+            int tamanhoBloco1 = _itens.Length - _frente;
+            Copiar(_frente, vetor, 0, tamanhoBloco1);
+            Copiar(0, vetor, tamanhoBloco1, _tras);
+        }
+        return vetor;
+    }
+
+    public static CFilaVet<T> ConcatenaFila(CFilaVet<T> f1, CFilaVet<T> f2)
+    {
+        if(f1 == null)
+            throw new ArgumentNullException(nameof(f1), "Nenhuma das filas a concatenar pode ser nula.");
+        if(f2 == null)
+            throw new ArgumentNullException(nameof(f2), "Nenhuma das filas a concatenar pode ser nula.");
+
+        CFilaVet<T> concatenada = new CFilaVet<T>(checked(f1._quantidade + f2._quantidade));
+        foreach (T item in f1)
+            concatenada.Enfileira(item);
+        foreach (T item in f2)
+            concatenada.Enfileira(item);
+
+        return concatenada;
+    }
+
     public int Capacidade => _itens.Length;
 
+    public bool EstaVazia => _quantidade == 0;
+
     public int Quantidade => _quantidade;
-}
+}*/
