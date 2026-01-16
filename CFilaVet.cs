@@ -1,4 +1,4 @@
-/*using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 /// <summary>
@@ -17,17 +17,17 @@ class CFilaVet<T>
     private static readonly T[] s_vetorVazio = new T[0]; // o campo itens de filas vazias sempre apontará para este vetor
 
     ///<summary>
-    /// Constrói uma pilha inicialmente vazia com capacidade para 0 elementos.
-    /// Ao adicionar o primeiro elemento, a capacidade da pilha aumenta para 6, e nas próximas realocações, dobra
+    /// Constrói uma fila inicialmente vazia com capacidade para 0 elementos.
+    /// Ao adicionar o primeiro elemento, a capacidade da fila aumenta para 6, e nas próximas realocações, dobra.
     /// </summary>
     public CFilaVet()
     {
         _itens = s_vetorVazio;
     }
 
-        /// <summary>
-    /// Constrói uma pilha com uma capacidade definida.
-    /// A pilha tem espaço para armazenar o número de elementos especificado antes que qualquer realocação seja necessária.
+    /// <summary>
+    /// Constrói uma fila com uma capacidade definida.
+    /// A fila tem espaço para armazenar o número de elementos especificado antes que qualquer realocação seja necessária.
     /// </summary>
     /// <param name="tamanho"></param>
     /// <exception cref="ArgumentOutOfRangeException">
@@ -36,7 +36,7 @@ class CFilaVet<T>
     public CFilaVet(int tamanho)
     {
         if (tamanho < 0)
-            throw new ArgumentOutOfRangeException(nameof(tamanho), "A capacidade da pilha não pode ser um número negativo.");
+            throw new ArgumentOutOfRangeException(nameof(tamanho), "A capacidade da fila não pode ser um número negativo.");
 
         if (tamanho == 0)
             _itens = s_vetorVazio;
@@ -44,9 +44,9 @@ class CFilaVet<T>
             _itens = new T[tamanho];
     }
 
-        /// <summary>
-    /// Constrói uma pilha, copiando o conteúdo de uma coleção fornecida.
-    /// A capacidade da nova pilha será igual a quantidade de itens da coleção.
+    /// <summary>
+    /// Constrói uma fila, copiando o conteúdo de uma coleção fornecida.
+    /// A capacidade da nova fila será igual a quantidade de itens da coleção.
     /// </summary>
     /// <param name="colecao"></param>
     /// <exception cref="ArgumentNullException"></exception>
@@ -70,7 +70,7 @@ class CFilaVet<T>
         else
         {
             _itens = s_vetorVazio;
-            foreach(T item in colecao)
+            foreach (T item in colecao)
                 Enfileira(item);
         }
     }
@@ -80,7 +80,7 @@ class CFilaVet<T>
         // Wrap-around feito com comparação ao invés de módulo (%) por desempenho.
         // Benchmarks disponíveis em experimentos/benchmarks/performance.md
         int temp = indice + 1;
-        if(temp == _itens.Length)
+        if (temp == _itens.Length)
             temp = 0;
 
         indice = temp;
@@ -91,7 +91,7 @@ class CFilaVet<T>
         int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
         // Permite que a fila cresça o máximo possível, antes de ocorrer overflow.
         // Esta checagem funciona mesmo quando a nova capacidade sofreu overflow, graças ao casting para uint.
-        if ((uint) novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
+        if ((uint)novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
         // se a capacidade calculada for menor que o necessário, seta o parâmetro original como nova capacidade.
         // Se a capacidade exceder Array.MaxLength, ocorrerá OutOfMemoryException.
         if (novaCapacidade < capacidade) novaCapacidade = capacidade;
@@ -100,6 +100,69 @@ class CFilaVet<T>
 
     private void Copiar(int indiceFonte, T[] vetorDestino, int indiceDestino, int quantidade)
     {
-        // implemento esse trem depois
+        for (int i = 0; i < quantidade; i++)
+            vetorDestino[indiceDestino + i] = _itens[indiceFonte + i];
     }
-}*/
+
+    private void Redimensiona(int tamanho)
+    {
+        if (tamanho != _itens.Length)
+        {
+            if (tamanho > 0)
+            {
+                T[] novoItens = new T[tamanho];
+                if (_frente < _tras)
+                    Copiar(_frente, novoItens, 0, _quantidade);
+                else
+                {
+                    int tamanhoBloco1 = _itens.Length - _frente;
+                    Copiar(_frente, novoItens, 0, tamanhoBloco1);
+                    Copiar(0, novoItens, tamanhoBloco1, _tras);
+                }
+                _itens = novoItens;
+            }
+            else
+                _itens = s_vetorVazio;
+
+            // Reconfigura frente e trás para ficarem compatíveis com o novo vetor
+            _frente = 0;
+            _tras = _quantidade;
+        }
+    }
+
+    public void Enfileira(T elemento)
+    {
+        if (_quantidade == _itens.Length)
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
+
+        _itens[_tras] = elemento;
+        Avancar(ref _tras);
+        _quantidade++;
+        _versao++;
+    }
+
+    public T Desenfileira()
+    {
+        if (_quantidade == 0)
+            throw new InvalidOperationException("Fila vazia.");
+
+        T item = _itens[_frente];
+        _itens[_frente] = default!;
+        Avancar(ref _frente);
+        _quantidade--;
+        _versao++;
+        return item;
+    }
+
+    public T Peek()
+    {
+        if (_quantidade == 0)
+            throw new InvalidOperationException("Fila vazia.");
+
+        return _itens[_frente];
+    }
+
+    public int Capacidade => _itens.Length;
+
+    public int Quantidade => _quantidade;
+}

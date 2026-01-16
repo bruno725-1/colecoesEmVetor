@@ -1,4 +1,4 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿/*using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
 BenchmarkRunner.Run<FilaBenchmark>();
@@ -7,6 +7,19 @@ public class FilaBenchmark
 {
     private int _index;
     private int _capacity = 6;
+    [Benchmark]
+    public void Modulo()
+    {
+        _index = (_index + 1) % _capacity;
+    }
+
+    [Benchmark]
+    public void IfWrap()
+    {
+        _index++;
+        if (_index == _capacity)
+            _index = 0;
+    }
     [Benchmark]
     public void ModuloLoop()
     {
@@ -24,4 +37,4 @@ public class FilaBenchmark
                 _index = 0;
         }
     }
-}
+}*/
