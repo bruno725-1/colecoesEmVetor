@@ -219,6 +219,9 @@ class CFilaVet<T> : IEnumerable<T>, ICollection<T>
         }
     }
 
+    public void CortarExcessos() => Redimensiona(_quantidade);
+
+    // copia os itens das duas filas recebidas como parâmetro para uma única fila.
     public static CFilaVet<T> ConcatenaFila(CFilaVet<T> f1, CFilaVet<T> f2)
     {
         if (f1 == null)

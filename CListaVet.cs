@@ -364,6 +364,23 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         _versao++;
     }
 
+    // copia os itens das duas listas recebidas como parâmetro para uma única lista.
+    public static CListaVet<T> ConcatenaLista(CListaVet<T> l1, CListaVet<T> l2)
+    {
+        if (l1 == null)
+            throw new ArgumentNullException(nameof(l1), "Nenhuma das listas a concatenar pode ser nula.");
+        if (l2 == null)
+            throw new ArgumentNullException(nameof(l2), "Nenhuma das listas a concatenar pode ser nula.");
+
+        CListaVet<T> concatenada = new CListaVet<T>(checked(l1._quantidade + l2._quantidade));
+        foreach(T item in l1)
+            concatenada.Adiciona(item);
+        foreach(T item in l2)
+            concatenada.Adiciona(item);
+
+        return concatenada;
+    }
+
     public int Quantidade => _quantidade;
 
     public int Capacidade
