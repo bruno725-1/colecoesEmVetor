@@ -77,7 +77,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
         // Permite que a lista cresça o máximo possível, antes de ocorrer overflow.
         // Esta checagem funciona mesmo quando a nova capacidade sofreu overflow, graças ao casting para uint.
-        if ((uint) novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
+        if ((uint)novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
         // se a capacidade calculada for menor que o necessário, seta o parâmetro original como nova capacidade. É mais provável que essa condição seja verdadeira em casos de adição em lote.
         // Se a capacidade exceder Array.MaxLength, ocorrerá OutOfMemoryException.
         if (novaCapacidade < capacidade) novaCapacidade = capacidade;
@@ -346,16 +346,16 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     public void RemoveFaixa(int posicao, int quantidade)
     {
-        if(posicao < 0 || posicao >= _quantidade)
+        if (posicao < 0 || posicao >= _quantidade)
             throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor que a quantidade de itens da lista.");
-        if(quantidade < 0)
+        if (quantidade < 0)
             throw new ArgumentOutOfRangeException(nameof(quantidade), "A quantidade de itens a serem removidos não pode ser um número negativo.");
-        if(posicao + quantidade > _quantidade)
+        if (posicao + quantidade > _quantidade)
             throw new ArgumentException("A soma entre a posição e a quantidade de itens a remover não pode ser maior que a quantidade de itens da lista.");
 
-        for(int i = posicao; i < posicao + quantidade; i++)
+        for (int i = posicao; i < posicao + quantidade; i++)
             _itens[i] = default!;
-        for(int i = posicao + quantidade; i < _quantidade; i++)
+        for (int i = posicao + quantidade; i < _quantidade; i++)
         {
             _itens[i - quantidade] = _itens[i];
             _itens[i] = default!;
@@ -386,7 +386,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         for (int i = 0; i < _quantidade; i++)
         {
             if (versao != _versao)
-                throw new InvalidOperationException("A lista foi modificada. Enumeração cancelada.");
+                throw new InvalidOperationException("A lista foi modificada. Operação de enumeração cancelada.");
 
             yield return _itens[i];
         }
@@ -403,6 +403,15 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     void ICollection<T>.CopyTo(T[] array, int arrayIndex)
     {
+        if (array == null)
+            throw new ArgumentNullException(nameof(array), "O array de destino não pode ser nulo.");
+        if (arrayIndex < 0)
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex), "O índice de destino não pode ser negativo.");
+        if (array.Length - arrayIndex < _quantidade)
+            throw new ArgumentException("O array de destino não possui espaço suficiente.");
+        if (_quantidade == 0)
+            return;
+
         for (int i = 0; i < _quantidade; i++)
             array[arrayIndex + i] = _itens[i];
     }

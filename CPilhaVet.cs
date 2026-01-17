@@ -76,7 +76,7 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
         int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
         // Permite que a pilha cresça o máximo possível, antes de ocorrer overflow.
         // Esta checagem funciona mesmo quando a nova capacidade sofreu overflow, graças ao casting para uint.
-        if ((uint) novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
+        if ((uint)novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
         // se a capacidade calculada for menor que o necessário, seta o parâmetro original como nova capacidade.
         // Se a capacidade exceder Array.MaxLength, ocorrerá OutOfMemoryException.
         if (novaCapacidade < capacidade) novaCapacidade = capacidade;
@@ -122,37 +122,12 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
         return item;
     }
 
-    public bool TentaDesempilhar(out T resultado)
-    {
-        if(_quantidade == 0)
-        {
-            resultado = default!;
-            return false;
-        }
-        _quantidade--;
-        resultado = _itens[_quantidade];
-        _itens[_quantidade] = default!;
-        _versao++;
-        return true;
-    }
-
     public T Peek()
     {
         if (_quantidade == 0)
             throw new InvalidOperationException("Pilha vazia.");
 
         return _itens[_quantidade - 1];
-    }
-
-    public bool TryPeek(out T resultado)
-    {
-        if(_quantidade == 0)
-        {
-            resultado = default!;
-            return false;
-        }
-        resultado = _itens[_quantidade - 1];
-        return true;
     }
 
     public bool Contem(T elemento)
@@ -182,9 +157,9 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
     /// </summary>
     public static CPilhaVet<T> ConcatenaPilha(CPilhaVet<T> p1, CPilhaVet<T> p2)
     {
-        if(p1 == null)
+        if (p1 == null)
             throw new ArgumentNullException(nameof(p1), "Nenhuma das pilhas a concatenar pode ser nula.");
-        if(p2 == null)
+        if (p2 == null)
             throw new ArgumentNullException(nameof(p2), "Nenhuma das pilhas a concatenar pode ser nula.");
 
         CPilhaVet<T> concatenada = new CPilhaVet<T>(checked(p1._quantidade + p2._quantidade));
@@ -198,7 +173,7 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
 
     public void Limpar()
     {
-        for(int i = 0; i < _quantidade; i++)
+        for (int i = 0; i < _quantidade; i++)
             _itens[i] = default!;
 
         _quantidade = 0;
@@ -217,7 +192,7 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
         for (int i = _quantidade - 1; i >= 0; i--)
         {
             if (versao != _versao)
-                throw new InvalidOperationException("A pilha foi modificada. Enumeração cancelada.");
+                throw new InvalidOperationException("A pilha foi modificada. Operação de enumeração cancelada.");
 
             yield return _itens[i];
         }
@@ -234,6 +209,15 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
 
     void ICollection<T>.CopyTo(T[] array, int arrayIndex)
     {
+        if (array == null)
+            throw new ArgumentNullException(nameof(array), "O array de destino não pode ser nulo.");
+        if (arrayIndex < 0)
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex), "O índice de destino não pode ser negativo.");
+        if (array.Length - arrayIndex < _quantidade)
+            throw new ArgumentException("O array de destino não possui espaço suficiente.");
+        if (_quantidade == 0)
+            return;
+
         for (int i = 0; i < _quantidade; i++)
             array[arrayIndex + i] = _itens[_quantidade - i - 1];
     }

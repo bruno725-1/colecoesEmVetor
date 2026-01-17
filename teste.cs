@@ -1,25 +1,27 @@
 using System;
-using System.Collections.Generic;
 using AED;
 class Teste
 {
     public static void Rodar()
     {
         CFilaVet<int> fila = new CFilaVet<int>();
-        for(int i = 1; i <= 6; i++)
+        for (int i = 1; i <= 10; i++)
             fila.Enfileira(i);
 
-        for(int i = 0; i < 3; i++)
+        for (int i = 0; i < 5; i++)
             fila.Desenfileira();
 
-        Console.WriteLine($"Frente da fila: {fila._frente}");
-        Console.WriteLine($"Trás da fila: {fila._tras}");
-        int[] vetor = fila.ParaVetor();
-
-        Console.WriteLine("Imprimindo o vetor:");
-        Console.WriteLine(string.Join(", ", vetor));
+        CListaVet<int> lista = new CListaVet<int>(2);
+        lista.Adiciona(1);
+        lista.Adiciona(2);
+        lista.AdicionaFaixa(fila);
+        Console.WriteLine($"Capacidade da fila: {fila.Capacidade}");
+        Console.WriteLine($"Quantidade de itens: {fila.Quantidade}");
+        Console.WriteLine($"Capacidade da lista: {lista.Capacidade}");
+        Console.WriteLine($"Quantidade de itens: {lista.Quantidade}");
+        Console.WriteLine("Imprimindo a lista:");
+        Console.WriteLine(string.Join(", ", lista));
         Console.WriteLine($"Imprimindo a fila:");
-        while(fila.Quantidade > 0)
-        Console.Write(fila.Desenfileira() + ", ");
+        Console.WriteLine(string.Join(", ", fila));
     }
 }

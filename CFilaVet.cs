@@ -1,4 +1,4 @@
-/*using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 /// <summary>
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// Internamente, a classe utiliza um vetor circular para armazenar os itens. Portanto, enfileirar e desenfileirar são tipicamente O(1), amenos que o vetor interno precise de redimensionamento.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-class CFilaVet<T>
+class CFilaVet<T> : IEnumerable<T>, ICollection<T>
 {
     private T[] _itens; // vetor que armazena os itens da fila
     private int _frente; // Índice por onde os itens serão desenfileirados.
@@ -124,7 +124,7 @@ class CFilaVet<T>
             else
                 _itens = s_vetorVazio;
 
-            // Reconfigura frente e trás para ficarem compatíveis com o novo vetor
+            // Reconfigurar frente e trás para ficarem compatíveis com o novo vetor
             _frente = 0;
             _tras = _quantidade;
         }
@@ -176,11 +176,54 @@ class CFilaVet<T>
         return vetor;
     }
 
+    public bool Contem(T elemento)
+    {
+        bool achou = false;
+        if (_frente < _tras)
+        {
+            for (int i = _frente; i < _tras && !achou; i++)
+                achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
+
+            return achou;
+        }
+        else
+        {
+            for (int i = _frente; i < _itens.Length && !achou; i++)
+                achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
+            for (int i = 0; i < _tras && !achou; i++)
+                achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
+
+            return achou;
+        }
+    }
+
+    public void Limpar()
+    {
+        if (_frente < _tras)
+        {
+            for (int i = _frente; i < _tras; i++)
+                _itens[i] = default!;
+
+            _quantidade = 0;
+            _versao++;
+        }
+        else
+        {
+            for (int i = _frente; i < _itens.Length; i++)
+                _itens[i] = default!;
+            for (int i = 0; i < _tras; i++)
+                _itens[i] = default!;
+
+            _quantidade = 0;
+            _versao++;
+        }
+    }
+
     public static CFilaVet<T> ConcatenaFila(CFilaVet<T> f1, CFilaVet<T> f2)
     {
-        if(f1 == null)
+        if (f1 == null)
             throw new ArgumentNullException(nameof(f1), "Nenhuma das filas a concatenar pode ser nula.");
-        if(f2 == null)
+        if (f2 == null)
             throw new ArgumentNullException(nameof(f2), "Nenhuma das filas a concatenar pode ser nula.");
 
         CFilaVet<T> concatenada = new CFilaVet<T>(checked(f1._quantidade + f2._quantidade));
@@ -197,4 +240,72 @@ class CFilaVet<T>
     public bool EstaVazia => _quantidade == 0;
 
     public int Quantidade => _quantidade;
-}*/
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        uint versao = _versao;
+        if (_frente < _tras)
+        {
+            for (int i = _frente; i < _tras; i++)
+            {
+                if (versao != _versao)
+                    throw new InvalidOperationException("A fila foi modificada. Operação de enumeração cancelada.");
+
+                yield return _itens[i];
+            }
+        }
+        else
+        {
+            for (int i = _frente; i < _itens.Length; i++)
+            {
+                if (versao != _versao)
+                    throw new InvalidOperationException("A fila foi modificada. Operação de enumeração cancelada.");
+
+                yield return _itens[i];
+            }
+            for (int i = 0; i < _tras; i++)
+            {
+                if (versao != _versao)
+                    throw new InvalidOperationException("A fila foi modificada. Operação de enumeração cancelada.");
+
+                yield return _itens[i];
+            }
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    // Implementação explícita da interface ICollection (métodos são acessíveis apenas via interface)
+    void ICollection<T>.Add(T item) => Enfileira(item); // insere o item no fim da fila
+
+    void ICollection<T>.Clear() => Limpar();
+
+    bool ICollection<T>.Contains(T item) => Contem(item);
+
+    void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+    {
+        if (array == null)
+            throw new ArgumentNullException(nameof(array), "O array de destino não pode ser nulo.");
+        if (arrayIndex < 0)
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex), "O índice de destino não pode ser negativo.");
+        if (array.Length - arrayIndex < _quantidade)
+            throw new ArgumentException("O array de destino não possui espaço suficiente.");
+        if (_quantidade == 0)
+            return;
+
+        if (_frente < _tras)
+            Copiar(_frente, array, 0 + arrayIndex, _quantidade);
+        else
+        {
+            int tamanhoBloco1 = _itens.Length - _frente;
+            Copiar(_frente, array, 0 + arrayIndex, tamanhoBloco1);
+            Copiar(0, array, tamanhoBloco1 + arrayIndex, _tras);
+        }
+    }
+
+    int ICollection<T>.Count => _quantidade;
+
+    bool ICollection<T>.IsReadOnly => false;
+
+    bool ICollection<T>.Remove(T item) => throw new NotSupportedException("Não é possível remover itens de forma harbitrária.");
+}
