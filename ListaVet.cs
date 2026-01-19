@@ -15,10 +15,11 @@ class ListaVet
         Console.WriteLine("Lista após Adiciona: " + string.Join(", ", numeros));
 
         // Limpar - remove todos os elementos
-        int[] colecao = { 1, 2, 3 };
-        CListaVet<int> outraLista = new CListaVet<int>(colecao);
+        CListaVet<int> outraLista = new CListaVet<int>(new int[]{1, 2, 3});
         outraLista.Limpar();
         Console.WriteLine("Outra lista após Limpar: " + string.Join(", ", outraLista));
+        // Capacidade - propriedade que retorna o número de elementos que podem ser adicionados antes que o vetor interno precise ser redimensionado
+        // também podemos usar esta propriedade para redimensionar o vetor interno, quando sabemos de quanto espaço a lista vai precisar
         Console.WriteLine("Capacidade de outra lista após Limpar: " + outraLista.Capacidade);
 
         // Contem - verifica se um elemento existe
@@ -46,6 +47,10 @@ class ListaVet
         numeros.RemoveIndice(0); // remove o primeiro elemento
         Console.WriteLine("Lista após RemoveIndice(0): " + string.Join(", ", numeros));
 
+        // Remove faixa - remove um intervalo de elementos
+        numeros.RemoveFaixa(0, 2); // remove os dois primeiros elementos
+        Console.WriteLine("Lista após RemoveFaixa(0, 2): " + string.Join(", ", numeros));
+
         // Inverte - inverte a ordem da lista
         numeros.Inverte();
         Console.WriteLine("Lista após Inverte: " + string.Join(", ", numeros));
@@ -58,26 +63,20 @@ class ListaVet
         int[] array = numeros.ParaVetor();
         Console.WriteLine("Array convertido da lista: " + string.Join(", ", array));
 
-        // CortarExcessos - ajusta capacidade da lista
+        // CortarExcessos - ajusta capacidade da lista para a quantidade real de elementos
         CListaVet<int> grandeLista = new CListaVet<int>(1000);
-        grandeLista.Adiciona(1);
-        grandeLista.Adiciona(2);
-        grandeLista.Adiciona(3);
+        // AdicionaFaixa - adiciona uma coleção de elementos no fim da lista
+        grandeLista.AdicionaFaixa(new int[]{1, 2, 3});
         Console.WriteLine($"Capacidade antes do CortarExcessos: {grandeLista.Capacidade}");
         grandeLista.CortarExcessos();
         Console.WriteLine($"Capacidade após CortarExcessos: {grandeLista.Capacidade}");
         Console.WriteLine("Lista números: " + string.Join(", ", numeros));
         Console.WriteLine($"Capacidade da lista números: {numeros.Capacidade}");
-        Console.WriteLine(numeros.Quantidade);
+        Console.WriteLine("Quantidade de itens da lista números: " + numeros.Quantidade);
         numeros.CortarExcessos();
         Console.WriteLine("Capacidade após cortar excessos: " + numeros.Capacidade);
-        numeros.Adiciona(85);
-        Console.WriteLine(string.Join(", ", numeros));
-        Console.WriteLine(numeros.Capacidade);
-        numeros.Adiciona(95);
-        numeros.Adiciona(98);
-        numeros.Adiciona(2001);
-        Console.WriteLine(string.Join(", ", numeros));
+        numeros.AdicionaFaixa(new int[]{95, 98, 2001});
+        Console.WriteLine("Lista números após AdicionaFaixa: " + string.Join(", ", numeros));
         Console.WriteLine("Capacidade da lista números: " + numeros.Capacidade);
     }
 }
