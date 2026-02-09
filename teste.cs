@@ -1,5 +1,4 @@
 using System;
-using AED;
 class Teste
 {
     public static void Rodar()

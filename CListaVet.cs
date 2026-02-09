@@ -242,9 +242,10 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     public void Ordenar()
     {
         if (_quantidade > 1)
+        {
             QuickSort(0, _quantidade - 1);
-
-        _versao++;
+            _versao++;
+        }
     }
 
     private void QuickSort(int esq, int dir)
