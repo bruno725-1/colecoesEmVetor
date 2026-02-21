@@ -215,8 +215,6 @@ public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
             throw new ArgumentOutOfRangeException(nameof(arrayIndex), "O índice de destino não pode ser negativo.");
         if (array.Length - arrayIndex < _quantidade)
             throw new ArgumentException("O array de destino não possui espaço suficiente.");
-        if (_quantidade == 0)
-            return;
 
         for (int i = 0; i < _quantidade; i++)
             array[arrayIndex + i] = _itens[_quantidade - i - 1];

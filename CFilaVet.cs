@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 /// <summary>
-/// <summary>
 /// Implementa uma lista FIFO (first-in first-out)
 /// Internamente, a classe utiliza um vetor circular para armazenar os itens. Portanto, enfileirar e desenfileirar são tipicamente O(1), amenos que o vetor interno precise de redimensionamento.
 /// </summary>
@@ -30,9 +29,7 @@ class CFilaVet<T> : IEnumerable<T>, ICollection<T>
     /// A fila tem espaço para armazenar o número de elementos especificado antes que qualquer realocação seja necessária.
     /// </summary>
     /// <param name="tamanho"></param>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Lançada quando o tamanho é negativo.
-    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     public CFilaVet(int tamanho)
     {
         if (tamanho < 0)
@@ -293,16 +290,17 @@ class CFilaVet<T> : IEnumerable<T>, ICollection<T>
             throw new ArgumentOutOfRangeException(nameof(arrayIndex), "O índice de destino não pode ser negativo.");
         if (array.Length - arrayIndex < _quantidade)
             throw new ArgumentException("O array de destino não possui espaço suficiente.");
-        if (_quantidade == 0)
-            return;
 
-        if (_frente < _tras)
-            Copiar(_frente, array, 0 + arrayIndex, _quantidade);
-        else
+        if (_quantidade > 0)
         {
-            int tamanhoBloco1 = _itens.Length - _frente;
-            Copiar(_frente, array, 0 + arrayIndex, tamanhoBloco1);
-            Copiar(0, array, tamanhoBloco1 + arrayIndex, _tras);
+            if (_frente < _tras)
+                Copiar(_frente, array, 0 + arrayIndex, _quantidade);
+            else
+            {
+                int tamanhoBloco1 = _itens.Length - _frente;
+                Copiar(_frente, array, 0 + arrayIndex, tamanhoBloco1);
+                Copiar(0, array, tamanhoBloco1 + arrayIndex, _tras);
+            }
         }
     }
 
