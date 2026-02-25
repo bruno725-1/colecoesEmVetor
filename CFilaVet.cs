@@ -162,13 +162,16 @@ class CFilaVet<T> : IEnumerable<T>, ICollection<T>
     public T[] ParaVetor()
     {
         T[] vetor = new T[_quantidade];
-        if (_frente < _tras)
-            Copiar(_frente, vetor, 0, _quantidade);
-        else
+        if (_quantidade > 0)
         {
-            int tamanhoBloco1 = _itens.Length - _frente;
-            Copiar(_frente, vetor, 0, tamanhoBloco1);
-            Copiar(0, vetor, tamanhoBloco1, _tras);
+            if (_frente < _tras)
+                Copiar(_frente, vetor, 0, _quantidade);
+            else
+            {
+                int tamanhoBloco1 = _itens.Length - _frente;
+                Copiar(_frente, vetor, 0, tamanhoBloco1);
+                Copiar(0, vetor, tamanhoBloco1, _tras);
+            }
         }
         return vetor;
     }
