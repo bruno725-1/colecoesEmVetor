@@ -9,8 +9,8 @@ using System.Collections.Generic;
 public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
 {
     private T[] _itens; // vetor que armazena os itens da fila
-    private int _frente; // Índice por onde os itens serão desenfileirados.
-    private int _tras; // Índice por onde os itens serão enfileirados.
+    private int _frente; // Índice por onde os itens serão desenfileirados
+    private int _tras; // Índice por onde os itens serão enfileirados
     private int _quantidade; // número de itens que a fila contém
     private uint _versao; // atributo para impedir modificações durante loops foreach
     private static readonly T[] s_vetorVazio = new T[0]; // o campo itens de filas vazias sempre apontará para este vetor
@@ -26,7 +26,7 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
 
     /// <summary>
     /// Constrói uma fila com uma capacidade definida.
-    /// A fila tem espaço para armazenar o número de elementos especificado antes que qualquer realocação seja necessária.
+    /// A fila tem espaço para armazenar o número de elementos especificado antes que o vetor interno precise ser redimensionado.
     /// </summary>
     /// <param name="tamanho"></param>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
@@ -85,7 +85,7 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
 
     private int CalcularCapacidade(int capacidade)
     {
-        int novaCapacidade = _quantidade == 0 ? 6 : _quantidade * 2;
+        int novaCapacidade = _quantidade == 0 ? 6 : _itens.Length * 2;
         // Permite que a fila cresça o máximo possível, antes de ocorrer overflow.
         // Esta checagem funciona mesmo quando a nova capacidade sofreu overflow, graças ao casting para uint.
         if ((uint)novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
@@ -183,8 +183,6 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
         {
             for (int i = _frente; i < _tras && !achou; i++)
                 achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
-
-            return achou;
         }
         else
         {
@@ -192,9 +190,8 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
                 achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
             for (int i = 0; i < _tras && !achou; i++)
                 achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
-
-            return achou;
         }
+        return achou;
     }
 
     public void Limpar()

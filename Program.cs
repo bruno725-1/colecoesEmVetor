@@ -1,14 +1,20 @@
 ﻿using System;
-class Program {
-    public static void Main (string[] args)
+class Program
+{
+    public static void Main(string[] args)
     {
         CFilaVet<int> fila = new CFilaVet<int>();
-        for(int i = 1; i <= 10; i++)
+        CListaVet<int> lista = new CListaVet<int>();
+        CPilhaVet<int> pilha = new CPilhaVet<int>();
+        for (int i = 1; i <= 50; i++)
+        {
             fila.Enfileira(i);
+            lista.Adiciona(i);
+            pilha.Empilha(i);
 
-        int[] vetor = fila.ParaVetor();
-        Console.WriteLine("Imprimindo o vetor resultante da conversão:");
-        Console.WriteLine(string.Join(", ", vetor));
-        Console.WriteLine($"Comprimento do vetor: {vetor.Length}");
+            Console.WriteLine($"Quantidade de elementos: {fila.Quantidade}");
+            Console.WriteLine($"Quantidade de elementos: {lista.Quantidade}");
+            Console.WriteLine($"Quantidade de elementos: {pilha.Quantidade}");
+        }
     }
 }
