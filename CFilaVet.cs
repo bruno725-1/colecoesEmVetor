@@ -200,9 +200,6 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
         {
             for (int i = _frente; i < _tras; i++)
                 _itens[i] = default!;
-
-            _quantidade = 0;
-            _versao++;
         }
         else
         {
@@ -210,10 +207,11 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
                 _itens[i] = default!;
             for (int i = 0; i < _tras; i++)
                 _itens[i] = default!;
-
-            _quantidade = 0;
-            _versao++;
         }
+        _quantidade = 0;
+        _frente = 0;
+        _tras = 0;
+        _versao++;
     }
 
     public void CortarExcessos() => Redimensiona(_quantidade);

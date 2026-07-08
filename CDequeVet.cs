@@ -5,11 +5,11 @@ using System.Collections.Generic;
 /// Implementa uma classe que pode funcionar como fila e pilha ao mesmo tempo, permitindo que operações como adição e remoção de itens sejam feitas em ambas as extremidades.
 /// Internamente, a classe utiliza um vetor circular para armazenar os itens.
 /// </summary>
-public class CDequeVet<T>
+public class CDequeVet<T> : IEnumerable<T>
 {
     private T[] _itens; // vetor que armazena os itens do deque
-    private int _esq; // Ponta esquerda do deque
-    private int _dir; // Ponta direita
+    public int _esq; // Ponta esquerda do deque
+    public int _dir; // Ponta direita
     private int _quantidade; // Número de itens que o deque contém
     private uint _versao; // Atributo para impedir modificações durante loops foreach
     private static readonly T[] s_vetorVazio = new T[0]; // o campo itens de deques vazios sempre apontará para este vetor
@@ -149,8 +149,8 @@ public class CDequeVet<T>
         if(_quantidade == _itens.Length)
             Redimensiona(CalcularCapacidade(_quantidade + 1));
 
-        _itens[_esq] = elemento;
         Retroceder(ref _esq);
+        _itens[_esq] = elemento;
         _quantidade++;
         _versao++;
     }
@@ -173,9 +173,9 @@ public class CDequeVet<T>
         if(_quantidade == 0)
             throw new InvalidOperationException("Deque vazio.");
 
+        Retroceder(ref _dir);
         T item = _itens[_dir];
         _itens[_dir] = default!;
-        Retroceder(ref _dir);
         _quantidade--;
         _versao++;
         return item;
@@ -194,7 +194,9 @@ public class CDequeVet<T>
         if(_quantidade == 0)
             throw new InvalidOperationException("Deque vazio.");
 
-        return _itens[_dir];
+        int i = _dir;
+        Retroceder(ref i);
+        return _itens[i];
     }
 
     // Copia o conteúdo de um deque para um vetor e o retorna.
@@ -233,4 +235,83 @@ public class CDequeVet<T>
         }
         return achou;
     }
+
+    public void Limpar()
+    {
+        if(_esq < _dir)
+        {
+            for(int i = _esq; i < _dir; i++)
+                _itens[i] = default!;
+        }
+        else
+        {
+            for(int i = _esq; i < _itens.Length; i++)
+                _itens[i] = default!;
+            for(int i = 0; i < _dir; i++)
+                _itens[i] = default!;
+
+        }
+        _quantidade = 0;
+        _esq = 0;
+        _dir = 0;
+        _versao++;
+    }
+
+    public static CDequeVet<T> ConcatenaDeque(CDequeVet<T> d1, CDequeVet<T> d2)
+    {
+        if(d1 == null)
+            throw new ArgumentNullException(nameof(d1), "Nenhum dos deques a concatenar pode ser nulo.");
+        if(d2 == null)
+            throw new ArgumentNullException(nameof(d2), "Nenhum dos deques a concatenar pode ser nulo.");
+
+        CDequeVet<T> concatenado = new CDequeVet<T>(checked(d1._quantidade + d2._quantidade));
+        foreach(T item in d1)
+            concatenado.AdicionaDireito(item);
+        foreach(T item in d2)
+            concatenado.AdicionaDireito(item);
+
+        return concatenado;
+    }
+
+    public void CortarExcessos() => Redimensiona(_quantidade);
+
+    public int Capacidade => _itens.Length;
+
+    public bool EstaVazio => _quantidade == 0;
+
+    public int Quantidade => _quantidade;
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        uint versao = _versao;
+        if(_esq < _dir)
+        {
+            for(int i = _esq; i < _dir; i++)
+            {
+                if(versao != _versao)
+                    throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
+
+                yield return _itens[i];
+            }
+        }
+        else
+        {
+            for(int i = _esq; i < _itens.Length; i++)
+            {
+                if(versao != _versao)
+                    throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
+
+                yield return _itens[i];
+            }
+            for(int i = 0; i < _dir; i++)
+            {
+                if(versao != _versao)
+                    throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
+
+                yield return _itens[i];
+            }
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
