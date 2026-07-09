@@ -5,11 +5,11 @@ using System.Collections.Generic;
 /// Implementa uma classe que pode funcionar como fila e pilha ao mesmo tempo, permitindo que operações como adição e remoção de itens sejam feitas em ambas as extremidades.
 /// Internamente, a classe utiliza um vetor circular para armazenar os itens.
 /// </summary>
-public class CDequeVet<T> : IEnumerable<T>
+public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 {
     private T[] _itens; // vetor que armazena os itens do deque
-    public int _esq; // Ponta esquerda do deque
-    public int _dir; // Ponta direita
+    private int _esq; // Ponta esquerda do deque
+    private int _dir; // Ponta direita
     private int _quantidade; // Número de itens que o deque contém
     private uint _versao; // Atributo para impedir modificações durante loops foreach
     private static readonly T[] s_vetorVazio = new T[0]; // o campo itens de deques vazios sempre apontará para este vetor
@@ -283,6 +283,9 @@ public class CDequeVet<T> : IEnumerable<T>
 
     public IEnumerator<T> GetEnumerator()
     {
+        if(_quantidade == 0)
+            yield break;
+
         uint versao = _versao;
         if(_esq < _dir)
         {
@@ -314,4 +317,72 @@ public class CDequeVet<T> : IEnumerable<T>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    // Possibilita iteração no deque de forma reversa (da direita para a esquerda)
+    public IEnumerable<T> EnumerarReverso()
+    {
+        uint versao = _versao;
+        if(_esq < _dir)
+        {
+            for(int i = _dir - 1; i >= _esq; i--)
+            {
+                if(versao != _versao)
+                    throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
+
+                yield return _itens[i];
+            }
+        }
+        else
+        {
+            for(int i = _dir - 1; i >= 0; i--)
+            {
+                if(versao != _versao)
+                    throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
+
+                yield return _itens[i];
+            }
+            for(int i = _itens.Length - 1; i >= _esq; i--)
+            {
+                if(versao != _versao)
+                    throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
+
+                yield return _itens[i];
+            }
+        }
+    }
+
+    // Implementação explícita da interface ICollection (métodos são acessíveis apenas via interface)
+    void ICollection<T>.Add(T item) => AdicionaDireito(item); // Insere o item na ponta direita do deque
+
+    void ICollection<T>.Clear() => Limpar();
+
+    bool ICollection<T>.Contains(T item) => Contem(item);
+
+    int ICollection<T>.Count => _quantidade;
+
+    void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+    {
+        if (array == null)
+            throw new ArgumentNullException(nameof(array), "O array de destino não pode ser nulo.");
+        if (arrayIndex < 0)
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex), "O índice de destino não pode ser negativo.");
+        if (array.Length - arrayIndex < _quantidade)
+            throw new ArgumentException("O array de destino não possui espaço suficiente.");
+
+        if(_quantidade > 0)
+        {
+            if(_esq < _dir)
+                Copiar(_esq, array, arrayIndex, _quantidade);
+            else
+            {
+                int tamanhoBloco1 = _itens.Length - _esq;
+                Copiar(_esq, array, arrayIndex, tamanhoBloco1);
+                Copiar(0, array, tamanhoBloco1 + arrayIndex, _dir);
+            }
+        }
+    }
+
+    bool ICollection<T>.IsReadOnly => false;
+
+    bool ICollection<T>.Remove(T item) => throw new NotSupportedException("Não é possível remover itens de forma harbitrária.");
 }

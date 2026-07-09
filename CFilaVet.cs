@@ -241,6 +241,9 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
 
     public IEnumerator<T> GetEnumerator()
     {
+        if(_quantidade == 0)
+            yield break;
+
         uint versao = _versao;
         if (_frente < _tras)
         {
@@ -292,11 +295,11 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
         if (_quantidade > 0)
         {
             if (_frente < _tras)
-                Copiar(_frente, array, 0 + arrayIndex, _quantidade);
+                Copiar(_frente, array, arrayIndex, _quantidade);
             else
             {
                 int tamanhoBloco1 = _itens.Length - _frente;
-                Copiar(_frente, array, 0 + arrayIndex, tamanhoBloco1);
+                Copiar(_frente, array, arrayIndex, tamanhoBloco1);
                 Copiar(0, array, tamanhoBloco1 + arrayIndex, _tras);
             }
         }
