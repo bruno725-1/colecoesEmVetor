@@ -29,10 +29,10 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
     /// </summary>
     public CDequeVet(int tamanho)
     {
-        if(tamanho < 0)
+        if (tamanho < 0)
             throw new ArgumentOutOfRangeException(nameof(tamanho), "A capacidade do deque não pode ser um número negativo.");
 
-        if(tamanho == 0)
+        if (tamanho == 0)
             _itens = s_vetorVazio;
         else
             _itens = new T[tamanho];
@@ -46,13 +46,13 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
     /// <exception cref="ArgumentNullException"></exception>
     public CDequeVet(IEnumerable<T> colecao)
     {
-        if(colecao == null)
+        if (colecao == null)
             throw new ArgumentNullException(nameof(colecao), "A coleção a copiar não pode ser nula.");
 
-        if(colecao is ICollection<T> c)
+        if (colecao is ICollection<T> c)
         {
             int tamanho = c.Count;
-            if(tamanho > 0)
+            if (tamanho > 0)
             {
                 _itens = new T[tamanho];
                 c.CopyTo(_itens, 0);
@@ -64,7 +64,7 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
         else
         {
             _itens = s_vetorVazio;
-            foreach(T item in colecao)
+            foreach (T item in colecao)
                 AdicionaDireito(item);
         }
     }
@@ -74,7 +74,7 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
         // Wrap-around feito com comparação ao invés de módulo (%) por desempenho.
         // Benchmarks disponíveis em experimentos/benchmarks/performance.md
         int temp = indice + 1;
-        if(temp == _itens.Length)
+        if (temp == _itens.Length)
             temp = 0;
 
         indice = temp;
@@ -83,7 +83,7 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
     private void Retroceder(ref int indice)
     {
         int temp = indice - 1;
-        if(temp < 0)
+        if (temp < 0)
             temp = _itens.Length - 1;
 
         indice = temp;
@@ -94,27 +94,27 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
         int novaCapacidade = _quantidade == 0 ? 6 : _itens.Length * 2;
         // Permite que a fila cresça o máximo possível, antes de ocorrer overflow.
         // Esta checagem funciona mesmo quando a nova capacidade sofreu overflow, graças ao casting para uint.
-        if((uint)novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
+        if ((uint)novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
         // se a capacidade calculada for menor que o necessário, seta o parâmetro original como nova capacidade.
         // Se a capacidade exceder Array.MaxLength, ocorrerá OutOfMemoryException.
-        if(novaCapacidade < capacidade) novaCapacidade = capacidade;
+        if (novaCapacidade < capacidade) novaCapacidade = capacidade;
         return novaCapacidade;
     }
 
     private void Copiar(int indiceFonte, T[] vetorDestino, int indiceDestino, int quantidade)
     {
-        for(int i = 0; i < quantidade; i++)
+        for (int i = 0; i < quantidade; i++)
             vetorDestino[indiceDestino + i] = _itens[indiceFonte + i];
     }
 
     private void Redimensiona(int tamanho)
     {
-        if(tamanho != _itens.Length)
+        if (tamanho != _itens.Length)
         {
-            if(tamanho > 0)
+            if (tamanho > 0)
             {
                 T[] novoItens = new T[tamanho];
-                if(_esq < _dir)
+                if (_esq < _dir)
                     Copiar(_esq, novoItens, 0, _quantidade);
                 else
                 {
@@ -135,7 +135,7 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public void AdicionaDireito(T elemento)
     {
-        if(_quantidade == _itens.Length)
+        if (_quantidade == _itens.Length)
             Redimensiona(CalcularCapacidade(_quantidade + 1));
 
         _itens[_dir] = elemento;
@@ -146,7 +146,7 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public void AdicionaEsquerdo(T elemento)
     {
-        if(_quantidade == _itens.Length)
+        if (_quantidade == _itens.Length)
             Redimensiona(CalcularCapacidade(_quantidade + 1));
 
         Retroceder(ref _esq);
@@ -157,7 +157,7 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public T RemoveRetornaEsquerdo()
     {
-        if(_quantidade == 0)
+        if (_quantidade == 0)
             throw new InvalidOperationException("Deque vazio.");
 
         T item = _itens[_esq];
@@ -170,7 +170,7 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public T RemoveRetornaDireito()
     {
-        if(_quantidade == 0)
+        if (_quantidade == 0)
             throw new InvalidOperationException("Deque vazio.");
 
         Retroceder(ref _dir);
@@ -183,7 +183,7 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public T RetornaEsquerdo()
     {
-        if(_quantidade == 0)
+        if (_quantidade == 0)
             throw new InvalidOperationException("Deque vazio.");
 
         return _itens[_esq];
@@ -191,7 +191,7 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public T RetornaDireito()
     {
-        if(_quantidade == 0)
+        if (_quantidade == 0)
             throw new InvalidOperationException("Deque vazio.");
 
         int i = _dir;
@@ -204,9 +204,9 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
     public T[] ParaVetor()
     {
         T[] vetor = new T[_quantidade];
-        if(_quantidade > 0)
+        if (_quantidade > 0)
         {
-            if(_esq < _dir)
+            if (_esq < _dir)
                 Copiar(_esq, vetor, 0, _quantidade);
             else
             {
@@ -220,17 +220,21 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public bool Contem(T elemento)
     {
+        // Evita buscas desnecessárias caso o deque esteja vazio
+        if (_quantidade == 0)
+            return false;
+
         bool achou = false;
-        if(_esq < _dir)
+        if (_esq < _dir)
         {
-            for(int i = _esq; i < _dir && !achou; i++)
+            for (int i = _esq; i < _dir && !achou; i++)
                 achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
         }
         else
         {
-            for(int i = _esq; i < _itens.Length && !achou; i++)
+            for (int i = _esq; i < _itens.Length && !achou; i++)
                 achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
-            for(int i = 0; i < _dir; i++)
+            for (int i = 0; i < _dir && !achou; i++)
                 achou = EqualityComparer<T>.Default.Equals(_itens[i], elemento);
         }
         return achou;
@@ -238,20 +242,22 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public void Limpar()
     {
-        if(_esq < _dir)
+        if (_quantidade > 0)
         {
-            for(int i = _esq; i < _dir; i++)
-                _itens[i] = default!;
+            if (_esq < _dir)
+            {
+                for (int i = _esq; i < _dir; i++)
+                    _itens[i] = default!;
+            }
+            else
+            {
+                for (int i = _esq; i < _itens.Length; i++)
+                    _itens[i] = default!;
+                for (int i = 0; i < _dir; i++)
+                    _itens[i] = default!;
+            }
+            _quantidade = 0;
         }
-        else
-        {
-            for(int i = _esq; i < _itens.Length; i++)
-                _itens[i] = default!;
-            for(int i = 0; i < _dir; i++)
-                _itens[i] = default!;
-
-        }
-        _quantidade = 0;
         _esq = 0;
         _dir = 0;
         _versao++;
@@ -259,15 +265,15 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public static CDequeVet<T> ConcatenaDeque(CDequeVet<T> d1, CDequeVet<T> d2)
     {
-        if(d1 == null)
+        if (d1 == null)
             throw new ArgumentNullException(nameof(d1), "Nenhum dos deques a concatenar pode ser nulo.");
-        if(d2 == null)
+        if (d2 == null)
             throw new ArgumentNullException(nameof(d2), "Nenhum dos deques a concatenar pode ser nulo.");
 
         CDequeVet<T> concatenado = new CDequeVet<T>(checked(d1._quantidade + d2._quantidade));
-        foreach(T item in d1)
+        foreach (T item in d1)
             concatenado.AdicionaDireito(item);
-        foreach(T item in d2)
+        foreach (T item in d2)
             concatenado.AdicionaDireito(item);
 
         return concatenado;
@@ -283,15 +289,15 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
 
     public IEnumerator<T> GetEnumerator()
     {
-        if(_quantidade == 0)
+        if (_quantidade == 0)
             yield break;
 
         uint versao = _versao;
-        if(_esq < _dir)
+        if (_esq < _dir)
         {
-            for(int i = _esq; i < _dir; i++)
+            for (int i = _esq; i < _dir; i++)
             {
-                if(versao != _versao)
+                if (versao != _versao)
                     throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
 
                 yield return _itens[i];
@@ -299,16 +305,16 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
         }
         else
         {
-            for(int i = _esq; i < _itens.Length; i++)
+            for (int i = _esq; i < _itens.Length; i++)
             {
-                if(versao != _versao)
+                if (versao != _versao)
                     throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
 
                 yield return _itens[i];
             }
-            for(int i = 0; i < _dir; i++)
+            for (int i = 0; i < _dir; i++)
             {
-                if(versao != _versao)
+                if (versao != _versao)
                     throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
 
                 yield return _itens[i];
@@ -321,12 +327,15 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
     // Possibilita iteração no deque de forma reversa (da direita para a esquerda)
     public IEnumerable<T> EnumerarReverso()
     {
+        if(_quantidade == 0)
+            yield break;
+
         uint versao = _versao;
-        if(_esq < _dir)
+        if (_esq < _dir)
         {
-            for(int i = _dir - 1; i >= _esq; i--)
+            for (int i = _dir - 1; i >= _esq; i--)
             {
-                if(versao != _versao)
+                if (versao != _versao)
                     throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
 
                 yield return _itens[i];
@@ -334,16 +343,16 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
         }
         else
         {
-            for(int i = _dir - 1; i >= 0; i--)
+            for (int i = _dir - 1; i >= 0; i--)
             {
-                if(versao != _versao)
+                if (versao != _versao)
                     throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
 
                 yield return _itens[i];
             }
-            for(int i = _itens.Length - 1; i >= _esq; i--)
+            for (int i = _itens.Length - 1; i >= _esq; i--)
             {
-                if(versao != _versao)
+                if (versao != _versao)
                     throw new InvalidOperationException("O deque foi modificado. Operação de enumeração cancelada.");
 
                 yield return _itens[i];
@@ -369,9 +378,9 @@ public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
         if (array.Length - arrayIndex < _quantidade)
             throw new ArgumentException("O array de destino não possui espaço suficiente.");
 
-        if(_quantidade > 0)
+        if (_quantidade > 0)
         {
-            if(_esq < _dir)
+            if (_esq < _dir)
                 Copiar(_esq, array, arrayIndex, _quantidade);
             else
             {

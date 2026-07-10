@@ -178,6 +178,10 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
 
     public bool Contem(T elemento)
     {
+        // Evita buscas desnecessárias caso a fila esteja vazia
+        if (_quantidade == 0)
+            return false;
+
         bool achou = false;
         if (_frente < _tras)
         {
@@ -196,19 +200,22 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
 
     public void Limpar()
     {
-        if (_frente < _tras)
+        if (_quantidade > 0)
         {
-            for (int i = _frente; i < _tras; i++)
-                _itens[i] = default!;
+            if (_frente < _tras)
+            {
+                for (int i = _frente; i < _tras; i++)
+                    _itens[i] = default!;
+            }
+            else
+            {
+                for (int i = _frente; i < _itens.Length; i++)
+                    _itens[i] = default!;
+                for (int i = 0; i < _tras; i++)
+                    _itens[i] = default!;
+            }
+            _quantidade = 0;
         }
-        else
-        {
-            for (int i = _frente; i < _itens.Length; i++)
-                _itens[i] = default!;
-            for (int i = 0; i < _tras; i++)
-                _itens[i] = default!;
-        }
-        _quantidade = 0;
         _frente = 0;
         _tras = 0;
         _versao++;
@@ -241,7 +248,7 @@ public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
 
     public IEnumerator<T> GetEnumerator()
     {
-        if(_quantidade == 0)
+        if (_quantidade == 0)
             yield break;
 
         uint versao = _versao;
