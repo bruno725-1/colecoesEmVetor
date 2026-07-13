@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// A lista tem uma capacidade, que é o comprimento do vetor interno.
 /// A medida que elementos são adicionados à lista, a capacidade dela aumenta automaticamente conforme necessário, realocando o vetor interno.
 /// </summary>
-public class CListaVet<T> : IEnumerable<T>, ICollection<T>
+public class CListaVet<T> : IList<T>, IReadOnlyList<T>
 {
     private T[] _itens; // vetor que armazena os itens da lista
     private int _quantidade; // número de elementos que a lista contém
@@ -84,23 +84,6 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         return novaCapacidade;
     }
 
-    private void Redimensiona(int tamanho)
-    {
-        if (tamanho != _itens.Length)
-        {
-            if (tamanho > 0)
-            {
-                T[] novoItens = new T[tamanho];
-                for (int i = 0; i < _quantidade; i++)
-                    novoItens[i] = _itens[i];
-
-                _itens = novoItens;
-            }
-            else
-                _itens = s_vetorVazio;
-        }
-    }
-
     // altera ou retorna o valor de um índice especificado
     public T this[int posicao]
     {
@@ -122,14 +105,14 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     public void Adiciona(T elemento)
     {
         if (_quantidade == _itens.Length)
-            Redimensiona(CalcularCapacidade(_quantidade + 1));
+            Capacidade = CalcularCapacidade(_quantidade + 1);
 
         _itens[_quantidade] = elemento;
         _quantidade++;
         _versao++;
     }
 
-    public void CortarExcessos() => Redimensiona(_quantidade);
+    public void CortarExcessos() => Capacidade = _quantidade;
 
     public bool Remove(T elemento)
     {
@@ -167,9 +150,10 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
             throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor ou igual a quantidade de itens da lista.");
 
         if (_quantidade == _itens.Length)
-            Redimensiona(CalcularCapacidade(_quantidade + 1));
+            Capacidade = CalcularCapacidade(_quantidade + 1);
         for (int i = _quantidade - 1; i >= posicao; i--)
             _itens[i + 1] = _itens[i];
+
         _itens[posicao] = elemento;
         _quantidade++;
         _versao++;
@@ -196,13 +180,15 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
         T[] vetor = new T[_quantidade];
         for (int i = 0; i < _quantidade; i++)
             vetor[i] = _itens[i];
+
         return vetor;
     }
 
     public void InsereAntesDe(T elementoAInserir, T referencia)
     {
         if (_quantidade == _itens.Length)
-            Redimensiona(CalcularCapacidade(_quantidade + 1));
+            Capacidade = CalcularCapacidade(_quantidade + 1);
+
         for (int i = 0; i < _quantidade; i++)
         {
             if (EqualityComparer<T>.Default.Equals(_itens[i], referencia))
@@ -210,6 +196,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
                 // desloca os elementos a partir de i uma posição à direita
                 for (int j = _quantidade - 1; j >= i; j--)
                     _itens[j + 1] = _itens[j];
+
                 _itens[i] = elementoAInserir; // insere exatamente na posição do elemento de referência
                 _quantidade++;
                 _versao++;
@@ -222,7 +209,8 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
     public void InsereDepoisDe(T elementoAInserir, T referencia)
     {
         if (_quantidade == _itens.Length)
-            Redimensiona(CalcularCapacidade(_quantidade + 1));
+            Capacidade = CalcularCapacidade(_quantidade + 1);
+
         for (int i = 0; i < _quantidade; i++)
         {
             if (EqualityComparer<T>.Default.Equals(_itens[i], referencia))
@@ -230,6 +218,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
                 // desloca todos os elementos a partir de i+1
                 for (int j = _quantidade - 1; j > i; j--)
                     _itens[j + 1] = _itens[j];
+
                 _itens[i + 1] = elementoAInserir;
                 _quantidade++;
                 _versao++;
@@ -331,7 +320,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
             if (tamanho > 0)
             {
                 if (_itens.Length - _quantidade < tamanho)
-                    Redimensiona(CalcularCapacidade(checked(_quantidade + tamanho)));
+                    Capacidade = CalcularCapacidade(checked(_quantidade + tamanho));
 
                 c.CopyTo(_itens, _quantidade);
                 _quantidade += tamanho;
@@ -356,6 +345,7 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
         for (int i = posicao; i < posicao + quantidade; i++)
             _itens[i] = default!;
+
         for (int i = posicao + quantidade; i < _quantidade; i++)
         {
             _itens[i - quantidade] = _itens[i];
@@ -374,15 +364,13 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
             throw new ArgumentNullException(nameof(l2), "Nenhuma das listas a concatenar pode ser nula.");
 
         CListaVet<T> concatenada = new CListaVet<T>(checked(l1._quantidade + l2._quantidade));
-        foreach(T item in l1)
+        foreach (T item in l1)
             concatenada.Adiciona(item);
-        foreach(T item in l2)
+        foreach (T item in l2)
             concatenada.Adiciona(item);
 
         return concatenada;
     }
-
-    public int Quantidade => _quantidade;
 
     public int Capacidade
     {
@@ -392,11 +380,25 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
             if (value < _quantidade)
                 throw new ArgumentOutOfRangeException(nameof(value), "A nova capacidade não pode ser menor que a quantidade de itens.");
 
-            Redimensiona(value);
+            if (value != _itens.Length)
+            {
+                if (value > 0)
+                {
+                    T[] novoItens = new T[value];
+                    for (int i = 0; i < _quantidade; i++)
+                        novoItens[i] = _itens[i];
+
+                    _itens = novoItens;
+                }
+                else
+                    _itens = s_vetorVazio;
+            }
         }
     }
 
     public bool EstaVazia => _quantidade == 0;
+
+    public int Quantidade => _quantidade;
 
     public IEnumerator<T> GetEnumerator()
     {
@@ -434,5 +436,13 @@ public class CListaVet<T> : IEnumerable<T>, ICollection<T>
 
     int ICollection<T>.Count => _quantidade;
 
+    int IReadOnlyCollection<T>.Count => _quantidade;
+
     bool ICollection<T>.IsReadOnly => false;
+
+    int IList<T>.IndexOf(T item) => PrimeiraOcorrenciaDe(item);
+
+    void IList<T>.Insert(int index, T item) => InsereIndice(item, index);
+
+    void IList<T>.RemoveAt(int index) => RemoveIndice(index);
 }
