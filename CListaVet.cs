@@ -91,12 +91,14 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
         {
             if (posicao < 0 || posicao >= _quantidade)
                 throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor que a quantidade de itens da lista.");
+
             return _itens[posicao];
         }
         set
         {
             if (posicao < 0 || posicao >= _quantidade)
                 throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor que a quantidade de itens da lista.");
+
             _itens[posicao] = value;
             _versao++;
         }
@@ -122,6 +124,7 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
             {
                 for (int j = i; j < _quantidade - 1; j++)
                     _itens[j] = _itens[j + 1]; //desloca os elementos para a esquerda a partir da posição removida.
+
                 //libera a referência da cópia do último item para o GC (muito útil para objetos do tipo referência)
                 _itens[_quantidade - 1] = default!;
                 _quantidade--;
@@ -139,6 +142,7 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
 
         for (int i = posicao; i < _quantidade - 1; i++)
             _itens[i] = _itens[i + 1]; //desloca os elementos para a esquerda a partir da posição removida.
+
         _itens[_quantidade - 1] = default!;
         _quantidade--;
         _versao++;
@@ -151,6 +155,7 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
 
         if (_quantidade == _itens.Length)
             Capacidade = CalcularCapacidade(_quantidade + 1);
+
         for (int i = _quantidade - 1; i >= posicao; i--)
             _itens[i + 1] = _itens[i];
 

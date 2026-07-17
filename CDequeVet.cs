@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// Implementa uma classe que pode funcionar como fila e pilha ao mesmo tempo, permitindo que operações como adição e remoção de itens sejam feitas em ambas as extremidades.
 /// Internamente, a classe utiliza um vetor circular para armazenar os itens.
 /// </summary>
-public class CDequeVet<T> : IEnumerable<T>, ICollection<T>
+public class CDequeVet<T> : ICollection<T>
 {
     private T[] _itens; // vetor que armazena os itens do deque
     private int _esq; // Ponta esquerda do deque

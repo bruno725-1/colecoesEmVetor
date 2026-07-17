@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// Internamente, a classe utiliza um vetor circular para armazenar os itens. Portanto, enfileirar e desenfileirar são tipicamente O(1), amenos que o vetor interno precise de redimensionamento.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class CFilaVet<T> : IEnumerable<T>, ICollection<T>
+public class CFilaVet<T> : ICollection<T>
 {
     private T[] _itens; // vetor que armazena os itens da fila
     private int _frente; // Índice por onde os itens serão desenfileirados

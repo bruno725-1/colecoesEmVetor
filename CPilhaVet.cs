@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// Classe CPilhaVet - implementa uma lista LIFO: last-in first-out
 /// Internamente, a classe utiliza um vetor para armazenar os itens, então empilhar pode ser o(n), enquanto desempilhar sempre será o(1)
 /// </summary>
-public class CPilhaVet<T> : IEnumerable<T>, ICollection<T>
+public class CPilhaVet<T> : ICollection<T>
 {
     private T[] _itens; // vetor que armazena os itens da pilha
     private int _quantidade; // número de itens que a pilha contém
