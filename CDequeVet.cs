@@ -92,7 +92,7 @@ public class CDequeVet<T> : ICollection<T>
     private int CalcularCapacidade(int capacidade)
     {
         int novaCapacidade = _quantidade == 0 ? 6 : _itens.Length * 2;
-        // Permite que a fila cresça o máximo possível, antes de ocorrer overflow.
+        // Permite que o deque cresça o máximo possível, antes de ocorrer overflow.
         // Esta checagem funciona mesmo quando a nova capacidade sofreu overflow, graças ao casting para uint.
         if ((uint)novaCapacidade > Array.MaxLength) novaCapacidade = Array.MaxLength;
         // se a capacidade calculada for menor que o necessário, seta o parâmetro original como nova capacidade.

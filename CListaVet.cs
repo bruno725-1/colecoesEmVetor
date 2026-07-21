@@ -55,14 +55,14 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
         if (colecao is ICollection<T> c)
         {
             int tamanho = c.Count;
-            if (tamanho == 0)
-                _itens = s_vetorVazio;
-            else
+            if (tamanho > 0)
             {
                 _itens = new T[tamanho];
                 c.CopyTo(_itens, 0);
                 _quantidade = tamanho;
             }
+            else
+                _itens = s_vetorVazio;
         }
         else
         {
@@ -82,6 +82,23 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
         // Se a capacidade exceder Array.MaxLength, ocorrerá OutOfMemoryException.
         if (novaCapacidade < capacidade) novaCapacidade = capacidade;
         return novaCapacidade;
+    }
+
+    private void Redimensiona(int tamanho)
+    {
+        if (tamanho != _itens.Length)
+        {
+            if (tamanho > 0)
+            {
+                T[] novoItens = new T[tamanho];
+                for (int i = 0; i < _quantidade; i++)
+                    novoItens[i] = _itens[i];
+
+                _itens = novoItens;
+            }
+            else
+                _itens = s_vetorVazio;
+        }
     }
 
     // altera ou retorna o valor de um índice especificado
@@ -107,14 +124,14 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
     public void Adiciona(T elemento)
     {
         if (_quantidade == _itens.Length)
-            Capacidade = CalcularCapacidade(_quantidade + 1);
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
 
         _itens[_quantidade] = elemento;
         _quantidade++;
         _versao++;
     }
 
-    public void CortarExcessos() => Capacidade = _quantidade;
+    public void CortarExcessos() => Redimensiona(_quantidade);
 
     public bool Remove(T elemento)
     {
@@ -154,7 +171,7 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
             throw new ArgumentOutOfRangeException(nameof(posicao), "O índice especificado estava fora do intervalo válido. Deve ser não-negativo e menor ou igual a quantidade de itens da lista.");
 
         if (_quantidade == _itens.Length)
-            Capacidade = CalcularCapacidade(_quantidade + 1);
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
 
         for (int i = _quantidade - 1; i >= posicao; i--)
             _itens[i + 1] = _itens[i];
@@ -192,7 +209,7 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
     public void InsereAntesDe(T elementoAInserir, T referencia)
     {
         if (_quantidade == _itens.Length)
-            Capacidade = CalcularCapacidade(_quantidade + 1);
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
 
         for (int i = 0; i < _quantidade; i++)
         {
@@ -208,13 +225,14 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
                 return;
             }
         }
+        // Se chegou até aqui, é porque o elemento de referência não foi encontrado.
         throw new ArgumentException("O elemento de referência especificado não foi encontrado na lista.", nameof(referencia));
     }
 
     public void InsereDepoisDe(T elementoAInserir, T referencia)
     {
         if (_quantidade == _itens.Length)
-            Capacidade = CalcularCapacidade(_quantidade + 1);
+            Redimensiona(CalcularCapacidade(_quantidade + 1));
 
         for (int i = 0; i < _quantidade; i++)
         {
@@ -246,7 +264,7 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
     {
         if (esq < dir)
         {
-            int p = ParticionaHoare(esq, dir); // índice de separação dos subconjuntos do array
+            int p = ParticionaHoare(esq, dir); // índice de separação dos subconjuntos do vetor
             QuickSort(esq, p); // lado esquerdo
             QuickSort(p + 1, dir); // lado direito
         }
@@ -311,13 +329,13 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
     {
         int esq = 0;
         int dir = _quantidade - 1;
-        while(esq <= dir)
+        while (esq <= dir)
         {
             int meio = esq + ((dir - esq) / 2);
             int resultado = Comparer<T>.Default.Compare(elemento, _itens[meio]);
-            if(resultado < 0) // se o elemento for menor que o item do meio
+            if (resultado < 0) // se o elemento pesquisado for menor que o item do meio
                 dir = meio - 1;
-            else if(resultado > 0) // se o elemento for maior
+            else if (resultado > 0) // se o elemento for maior
                 esq = meio + 1;
             else // Encontrou o item
                 return meio;
@@ -347,7 +365,7 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
             if (tamanho > 0)
             {
                 if (_itens.Length - _quantidade < tamanho)
-                    Capacidade = CalcularCapacidade(checked(_quantidade + tamanho));
+                    Redimensiona(CalcularCapacidade(checked(_quantidade + tamanho)));
 
                 c.CopyTo(_itens, _quantidade);
                 _quantidade += tamanho;
@@ -407,19 +425,7 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
             if (value < _quantidade)
                 throw new ArgumentOutOfRangeException(nameof(value), "A nova capacidade não pode ser menor que a quantidade de itens.");
 
-            if (value != _itens.Length)
-            {
-                if (value > 0)
-                {
-                    T[] novoItens = new T[value];
-                    for (int i = 0; i < _quantidade; i++)
-                        novoItens[i] = _itens[i];
-
-                    _itens = novoItens;
-                }
-                else
-                    _itens = s_vetorVazio;
-            }
+            Redimensiona(value);
         }
     }
 
