@@ -305,6 +305,28 @@ public class CListaVet<T> : IList<T>, IReadOnlyList<T>
         return achou;
     }
 
+    // Busca por um determinado elemento na lista usando um algoritmo de pesquisa binária.
+    // Para esse método funcionar, a lista precisa estar ordenada. Caso contrário, o resultado ficará incorreto.
+    public int PesquisaBinaria(T elemento)
+    {
+        int esq = 0;
+        int dir = _quantidade - 1;
+        while(esq <= dir)
+        {
+            int meio = esq + ((dir - esq) / 2);
+            int resultado = Comparer<T>.Default.Compare(elemento, _itens[meio]);
+            if(resultado < 0) // se o elemento for menor que o item do meio
+                dir = meio - 1;
+            else if(resultado > 0) // se o elemento for maior
+                esq = meio + 1;
+            else // Encontrou o item
+                return meio;
+        }
+        // O último valor de esq representa tanto o índice do primeiro elemento (se houver) que seja maior que o item pesquisado, quanto o índice no qual este item deveria estar para que a lista continuasse ordenada.
+        // Sabendo disso, apliquei o operador de complemento bit a bit (~) a esse valor, o que o transforma em um índice negativo.
+        return ~esq;
+    }
+
     public void Limpar()
     {
         for (int i = 0; i < _quantidade; i++)

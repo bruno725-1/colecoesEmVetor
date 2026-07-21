@@ -59,6 +59,13 @@ class ListaVet
         numeros.Ordenar();
         Console.WriteLine("Lista após Ordenar: " + string.Join(", ", numeros));
 
+        // PesquisaBinaria - precisa estar ordenada
+        int pos = numeros.PesquisaBinaria(30);
+        Console.WriteLine($"Posição do 30 após PesquisaBinaria: {pos}");
+        pos = numeros.PesquisaBinaria(45); // Retorna um número negativo. Se convertido para positivo usando o operador de complemento bit a bit (~), este número representa o índice onde o 45 deveria ficar para que a lista continuasse ordenada
+        Console.WriteLine($"Posição do 45 após PesquisaBinaria: {pos}");
+        Console.WriteLine($"Convertendo o resultado (operador ~): {~pos}");
+
         // ParaVetor - converte para array
         int[] array = numeros.ParaVetor();
         Console.WriteLine("Array convertido da lista: " + string.Join(", ", array));
